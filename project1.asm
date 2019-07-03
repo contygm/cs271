@@ -1,4 +1,4 @@
-ELEMENTARY ARITHMETIC Program     (template.asm)
+TITLE Program #1: Elementary Arithmetic      (project1.asm)
 
 ; Author: Genevieve Conty
 ; Last Modified: 07/07/2019
@@ -13,7 +13,7 @@ INCLUDE Irvine32.inc
 
 ; prompts
 intro_1		BYTE	"Elementary Arithmetic by Genevieve Conty",0
-instro_2	BYTE	"Enter 2 numbers, and I'll show you the sum, difference, product, quotient, and remainder.",0
+intro_2		BYTE	"Enter 2 numbers, and I'll show you the sum, difference, product, quotient, and remainder.",0
 outro		BYTE	"Impressed? Bye",0
 prompt_1	BYTE	"First number: ",0
 prompt_2	BYTE	"Second number: ",0
@@ -43,21 +43,73 @@ squared		DWORD	?
 .code
 main PROC
 
-; TODO Display your name and program title
+; Display your name, program title, and EC notices
+	mov		edx, OFFSET intro_1
+	call	WriteString
+	call	CrLf
+	
+	mov		edx, OFFSET intro_EC_1
+	call	WriteString
+	call	CrLf
+	
+	mov		edx, OFFSET intro_EC_2
+	call	WriteString
+	call	CrLf
 
-; TODO Display instructions for the user
+; Display instructions for the user
+	mov		edx, OFFSET intro_2
+	call	WriteString
+	call	CrLf
 
 ; TODO Prompt the user to enter two numbers
+	mov		edx, OFFSET prompt_1
+	call	WriteString
+	call	CrLf
+
+	mov		edx, OFFSET prompt_2
+	call	WriteString
+	call	CrLf
 
 ; TODO Calculate the sum, difference, product, (integer) quotient and remainder 
+	mov		edx, OFFSET plus
+	mov		edx, OFFSET equals
+	call	WriteString
+	call	CrLf
 
+	mov		edx, OFFSET minus
+	mov		edx, OFFSET equals
+	call	WriteString
+	call	CrLf
+
+	mov		edx, OFFSET multiply
+	mov		edx, OFFSET equals
+	call	WriteString
+	call	CrLf
+
+	mov		edx, OFFSET divide
+	mov		edx, OFFSET equals
+	mov		edx, OFFSET remainder
+	call	WriteString
+	call	CrLf
 
 ; --------------- EXTRA CREDIT -----------------------
 ; TODO Display the square of each number
+	mov		edx, OFFSET square
+	call	WriteString
+	call	CrLf
+
+	mov		edx, OFFSET square
+	call	WriteString
+	call	CrLf
+
 ; TODO Validate the second number to be less than the first
+	mov		edx, OFFSET notValid
+	call	WriteString
+	call	CrLf
 ; --------------- END EC -----------------------
 
-; TODO Display a terminating message
+; Display a terminating message
+	mov		edx, OFFSET outro
 
 	exit	; exit to operating system
 main ENDP
