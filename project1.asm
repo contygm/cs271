@@ -32,6 +32,8 @@ difference	DWORD	?
 product		DWORD	?
 quotient	DWORD	?
 remainder	DWORD	?
+firstNum	DWORD	?
+secondNum	DWORD	?
 
 ; EC Data
 intro_EC_1 	BYTE	"**EC: Program verifies second number less than first.",0
@@ -61,52 +63,92 @@ main PROC
 	call	WriteString
 	call	CrLf
 
-; TODO Prompt the user to enter two numbers
+; Prompt the user to enter two numbers
 	mov		edx, OFFSET prompt_1
 	call	WriteString
-	call	CrLf
+	call	ReadInt
+	mov		firstNum, eax
 
 	mov		edx, OFFSET prompt_2
 	call	WriteString
-	call	CrLf
+	call	ReadInt
+	mov		secondNum, eax
 
-; TODO Calculate the sum, difference, product, (integer) quotient and remainder 
+; --------------- EXTRA CREDIT 1 -----------------------
+; TODO Validate the second number to be less than the first
+;	mov		edx, OFFSET notValid
+;	call	WriteString
+;	call	CrLf
+; --------------- END EC 1 -----------------------
+
+; Calculate and print sum
+	mov		eax, firstNum
+	add		eax, secondNum
+	mov		sum, eax
+
+; NOTE: WriteInt will also print the sign
+	mov		eax, firstNum
+	call	WriteDec
 	mov		edx, OFFSET plus
+	call	WriteString
+	mov		eax, secondNum
+	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString
+	mov		eax, sum
+	call	WriteDec
 	call	CrLf
 
+; TODO calculate and print difference
+	mov		eax, firstNum
+	call	WriteDec
 	mov		edx, OFFSET minus
+	mov		eax, secondNum
+	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString
 	call	CrLf
 
+; TODO calculate and print product
+	mov		eax, firstNum
+	call	WriteDec
 	mov		edx, OFFSET multiply
+	mov		eax, secondNum
+	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString
 	call	CrLf
 
+; TODO calculate and print (integer) quotient and remainder
+	mov		eax, firstNum
+	call	WriteDec
 	mov		edx, OFFSET divide
+	mov		eax, secondNum
+	call	WriteDec
 	mov		edx, OFFSET equals
+	call	WriteString
 	mov		edx, OFFSET remainder
 	call	WriteString
 	call	CrLf
 
-; --------------- EXTRA CREDIT -----------------------
+; --------------- EXTRA CREDIT 2 -----------------------
 ; TODO Display the square of each number
 	mov		edx, OFFSET square
 	call	WriteString
+	mov		eax, firstNum
+	call	WriteDec
+	mov		edx, OFFSET equals
+	call	WriteString
 	call	CrLf
 
 	mov		edx, OFFSET square
 	call	WriteString
+	mov		eax, secondNum
+	call	WriteDec
+	mov		edx, OFFSET equals
+	call	WriteString	
 	call	CrLf
-
-; TODO Validate the second number to be less than the first
-	mov		edx, OFFSET notValid
-	call	WriteString
-	call	CrLf
-; --------------- END EC -----------------------
+; --------------- END EC 2 -----------------------
 
 ; Display a terminating message
 	mov		edx, OFFSET outro

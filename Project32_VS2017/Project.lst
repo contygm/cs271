@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.16.27025.1	    07/03/19 12:17:09
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 17:39:41
 5Program #1: Elementary Arithmetic      (project1.asm	     Page 1 - 1
 
 
@@ -42,7 +42,7 @@ Microsoft (R) Macro Assembler Version 14.16.27025.1	    07/03/19 12:17:09
 	   69 65 76 65 20
 	   43 6F 6E 74 79
 	   00
- 00000029 45 6E 74 65 72	intro_2	BYTE	"Enter 2 numbers, and I'll show you the sum, difference, product, quotient, and remainder.",0
+ 00000029 45 6E 74 65 72	intro_2		BYTE	"Enter 2 numbers, and I'll show you the sum, difference, product, quotient, and remainder.",0
 	   20 32 20 6E 75
 	   6D 62 65 72 73
 	   2C 20 61 6E 64
@@ -87,9 +87,11 @@ Microsoft (R) Macro Assembler Version 14.16.27025.1	    07/03/19 12:17:09
  000000D9 00000000		product		DWORD	?
  000000DD 00000000		quotient	DWORD	?
  000000E1 00000000		remainder	DWORD	?
+ 000000E5 00000000		firstNum	DWORD	?
+ 000000E9 00000000		secondNum	DWORD	?
 
 				; EC Data
- 000000E5 2A 2A 45 43 3A	intro_EC_1 	BYTE	"**EC: Program verifies second number less than first.",0
+ 000000ED 2A 2A 45 43 3A	intro_EC_1 	BYTE	"**EC: Program verifies second number less than first.",0
 	   20 50 72 6F 67
 	   72 61 6D 20 76
 	   65 72 69 66 69
@@ -100,7 +102,7 @@ Microsoft (R) Macro Assembler Version 14.16.27025.1	    07/03/19 12:17:09
 	   73 20 74 68 61
 	   6E 20 66 69 72
 	   73 74 2E 00
- 0000011B 2A 2A 45 43 3A	intro_EC_2 	BYTE	"**EC: Program displays square of inputted numbers.",0
+ 00000123 2A 2A 45 43 3A	intro_EC_2 	BYTE	"**EC: Program displays square of inputted numbers.",0
 	   20 50 72 6F 67
 	   72 61 6D 20 64
 	   69 73 70 6C 61
@@ -111,7 +113,7 @@ Microsoft (R) Macro Assembler Version 14.16.27025.1	    07/03/19 12:17:09
 	   64 20 6E 75 6D
 	   62 65 72 73 2E
 	   00
- 0000014E 54 68 65 20 76	notValid	BYTE	"The value is not less than the first number",0
+ 00000156 54 68 65 20 76	notValid	BYTE	"The value is not less than the first number",0
 	   61 6C 75 65 20
 	   69 73 20 6E 6F
 	   74 20 6C 65 73
@@ -120,83 +122,109 @@ Microsoft (R) Macro Assembler Version 14.16.27025.1	    07/03/19 12:17:09
 	   20 66 69 72 73
 	   74 20 6E 75 6D
 	   62 65 72 00
- 0000017A 53 71 75 61 72	square		BYTE	"Square of ",0
+ 00000182 53 71 75 61 72	square		BYTE	"Square of ",0
 	   65 20 6F 66 20
 	   00
- 00000185 00000000		squared		DWORD	?
+ 0000018D 00000000		squared		DWORD	?
 
  00000000			.code
  00000000			main PROC
 
-				; TODO Display your name and program title
+				; Display your name, program title, and EC notices
  00000000  BA 00000000 R		mov		edx, OFFSET intro_1
  00000005  E8 00000000 E		call	WriteString
  0000000A  E8 00000000 E		call	CrLf
-
-				; TODO Display instructions for the user
- 0000000F  BA 00000029 R		mov		edx, OFFSET intro_2
+					
+ 0000000F  BA 000000ED R		mov		edx, OFFSET intro_EC_1
  00000014  E8 00000000 E		call	WriteString
  00000019  E8 00000000 E		call	CrLf
-
-				; TODO Prompt the user to enter two numbers
- 0000001E  BA 00000092 R		mov		edx, OFFSET prompt_1
+					
+ 0000001E  BA 00000123 R		mov		edx, OFFSET intro_EC_2
  00000023  E8 00000000 E		call	WriteString
  00000028  E8 00000000 E		call	CrLf
 
- 0000002D  BA 000000A1 R		mov		edx, OFFSET prompt_2
+				; Display instructions for the user
+ 0000002D  BA 00000029 R		mov		edx, OFFSET intro_2
  00000032  E8 00000000 E		call	WriteString
  00000037  E8 00000000 E		call	CrLf
 
-				; TODO Calculate the sum, difference, product, (integer) quotient and remainder 
- 0000003C  BA 000000B5 R		mov		edx, OFFSET plus
- 00000041  BA 000000B9 R		mov		edx, OFFSET equals
- 00000046  E8 00000000 E		call	WriteString
- 0000004B  E8 00000000 E		call	CrLf
+				; Prompt the user to enter two numbers
+ 0000003C  BA 00000092 R		mov		edx, OFFSET prompt_1
+ 00000041  E8 00000000 E		call	WriteString
+ 00000046  E8 00000000 E		call	ReadInt
+ 0000004B  A3 000000E5 R		mov		firstNum, eax
 
- 00000050  BA 000000B1 R		mov		edx, OFFSET minus
- 00000055  BA 000000B9 R		mov		edx, OFFSET equals
- 0000005A  E8 00000000 E		call	WriteString
- 0000005F  E8 00000000 E		call	CrLf
+ 00000050  BA 000000A1 R		mov		edx, OFFSET prompt_2
+ 00000055  E8 00000000 E		call	WriteString
+ 0000005A  E8 00000000 E		call	ReadInt
+ 0000005F  A3 000000E9 R		mov		secondNum, eax
 
- 00000064  BA 000000C1 R		mov		edx, OFFSET multiply
- 00000069  BA 000000B9 R		mov		edx, OFFSET equals
- 0000006E  E8 00000000 E		call	WriteString
- 00000073  E8 00000000 E		call	CrLf
-
- 00000078  BA 000000BD R		mov		edx, OFFSET divide
- 0000007D  BA 000000B9 R		mov		edx, OFFSET equals
- 00000082  BA 000000E1 R		mov		edx, OFFSET remainder
- 00000087  E8 00000000 E		call	WriteString
- 0000008C  E8 00000000 E		call	CrLf
-
-				; --------------- EXTRA CREDIT -----------------------
-				; TODO Display the square of each number
- 00000091  BA 0000017A R		mov		edx, OFFSET square
- 00000096  E8 00000000 E		call	WriteString
- 0000009B  E8 00000000 E		call	CrLf
-
- 000000A0  BA 0000017A R		mov		edx, OFFSET square
- 000000A5  E8 00000000 E		call	WriteString
- 000000AA  E8 00000000 E		call	CrLf
-
+				; --------------- EXTRA CREDIT 1 -----------------------
 				; TODO Validate the second number to be less than the first
- 000000AF  BA 0000014E R		mov		edx, OFFSET notValid
- 000000B4  E8 00000000 E		call	WriteString
- 000000B9  E8 00000000 E		call	CrLf
-				; --------------- END EC -----------------------
+				;	mov		edx, OFFSET notValid
+				;	call	WriteString
+				;	call	CrLf
+				; --------------- END EC 1 -----------------------
 
-				; TODO Display a terminating message
- 000000BE  BA 00000083 R		mov		edx, OFFSET outro
+				; TODO Calculate and print sum
+ 00000064  A1 000000E5 R		mov		eax, firstNum
+ 00000069  03 05 000000E9 R		add		eax, secondNum
+ 0000006F  A3 000000D1 R		mov		sum, eax
+
+ 00000074  A1 000000E5 R		mov		eax, firstNum
+ 00000079  E8 00000000 E		call	WriteDec
+ 0000007E  BA 000000B5 R		mov		edx, OFFSET plus
+ 00000083  E8 00000000 E		call	WriteString
+ 00000088  A1 000000E9 R		mov		eax, secondNum
+ 0000008D  E8 00000000 E		call	WriteDec
+ 00000092  BA 000000B9 R		mov		edx, OFFSET equals
+ 00000097  E8 00000000 E		call	WriteString
+ 0000009C  A1 000000D1 R		mov		eax, sum
+ 000000A1  E8 00000000 E		call	WriteInt
+ 000000A6  E8 00000000 E		call	CrLf
+
+				; TODO calculate and print difference
+ 000000AB  BA 000000B1 R		mov		edx, OFFSET minus
+ 000000B0  BA 000000B9 R		mov		edx, OFFSET equals
+ 000000B5  E8 00000000 E		call	WriteString
+ 000000BA  E8 00000000 E		call	CrLf
+
+				; TODO calculate and print product
+ 000000BF  BA 000000C1 R		mov		edx, OFFSET multiply
+ 000000C4  BA 000000B9 R		mov		edx, OFFSET equals
+ 000000C9  E8 00000000 E		call	WriteString
+ 000000CE  E8 00000000 E		call	CrLf
+
+				; TODO calculate and print (integer) quotient and remainder
+ 000000D3  BA 000000BD R		mov		edx, OFFSET divide
+ 000000D8  BA 000000B9 R		mov		edx, OFFSET equals
+ 000000DD  BA 000000E1 R		mov		edx, OFFSET remainder
+ 000000E2  E8 00000000 E		call	WriteString
+ 000000E7  E8 00000000 E		call	CrLf
+
+				; --------------- EXTRA CREDIT 2 -----------------------
+				; TODO Display the square of each number
+ 000000EC  BA 00000182 R		mov		edx, OFFSET square
+ 000000F1  E8 00000000 E		call	WriteString
+ 000000F6  E8 00000000 E		call	CrLf
+
+ 000000FB  BA 00000182 R		mov		edx, OFFSET square
+ 00000100  E8 00000000 E		call	WriteString
+ 00000105  E8 00000000 E		call	CrLf
+				; --------------- END EC 2 -----------------------
+
+				; Display a terminating message
+ 0000010A  BA 00000083 R		mov		edx, OFFSET outro
 
 					exit	; exit to operating system
- 000000C3  6A 00	   *	    push   +000000000h
- 000000C5  E8 00000000 E   *	    call   ExitProcess
- 000000CA			main ENDP
+ 0000010F  6A 00	   *	    push   +000000000h
+ 00000111  E8 00000000 E   *	    call   ExitProcess
+ 00000116			main ENDP
 
 				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.16.27025.1	    07/03/19 12:17:09
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 17:39:41
 5Program #1: Elementary Arithmetic      (project1.asm	     Symbols 2 - 1
 
 
@@ -290,8 +318,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000189 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000CA Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000191 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000116 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -398,7 +426,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000CA Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000116 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -625,12 +653,13 @@ difference . . . . . . . . . . .	DWord	 000000D5 _DATA
 divide . . . . . . . . . . . . .	Byte	 000000BD _DATA	
 equals . . . . . . . . . . . . .	Byte	 000000B9 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
+firstNum . . . . . . . . . . . .	DWord	 000000E5 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 intro_1  . . . . . . . . . . . .	Byte	 00000000 _DATA	
 intro_2  . . . . . . . . . . . .	Byte	 00000029 _DATA	
-intro_EC_1 . . . . . . . . . . .	Byte	 000000E5 _DATA	
-intro_EC_2 . . . . . . . . . . .	Byte	 0000011B _DATA	
+intro_EC_1 . . . . . . . . . . .	Byte	 000000ED _DATA	
+intro_EC_2 . . . . . . . . . . .	Byte	 00000123 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -640,7 +669,7 @@ lightRed . . . . . . . . . . . .	Number	 0000000Ch
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 minus  . . . . . . . . . . . . .	Byte	 000000B1 _DATA	
 multiply . . . . . . . . . . . .	Byte	 000000C1 _DATA	
-notValid . . . . . . . . . . . .	Byte	 0000014E _DATA	
+notValid . . . . . . . . . . . .	Byte	 00000156 _DATA	
 outro  . . . . . . . . . . . . .	Byte	 00000083 _DATA	
 plus . . . . . . . . . . . . . .	Byte	 000000B5 _DATA	
 product  . . . . . . . . . . . .	DWord	 000000D9 _DATA	
@@ -650,8 +679,9 @@ quotient . . . . . . . . . . . .	DWord	 000000DD _DATA
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 remainder  . . . . . . . . . . .	DWord	 000000E1 _DATA	
 remain . . . . . . . . . . . . .	Byte	 000000C5 _DATA	
-squared  . . . . . . . . . . . .	DWord	 00000185 _DATA	
-square . . . . . . . . . . . . .	Byte	 0000017A _DATA	
+secondNum  . . . . . . . . . . .	DWord	 000000E9 _DATA	
+squared  . . . . . . . . . . . .	DWord	 0000018D _DATA	
+square . . . . . . . . . . . . .	Byte	 00000182 _DATA	
 sum  . . . . . . . . . . . . . .	DWord	 000000D1 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
