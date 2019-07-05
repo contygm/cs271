@@ -99,36 +99,62 @@ main PROC
 	call	WriteDec
 	call	CrLf
 
-; TODO calculate and print difference
+; calculate and print difference
+	mov		eax, firstNum
+	sub		eax, secondNum
+	mov		difference, eax	
+
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET minus
+	call	WriteString
 	mov		eax, secondNum
 	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString
+	mov		eax, difference
+	call	WriteDec
 	call	CrLf
 
-; TODO calculate and print product
+; calculate and print product
+	mov		eax, firstNum
+	mul		secondNum
+	mov		product, eax
+
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET multiply
+	call	WriteString
 	mov		eax, secondNum
 	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString
+	mov		eax, product
+	call	WriteDec
 	call	CrLf
 
-; TODO calculate and print (integer) quotient and remainder
+; calculate and print (integer) quotient and remainder
+	mov		eax, firstNum
+	mov		ebx, secondNum
+	mov		edx, 0			; initialize remainder container
+	div		ebx
+	mov		quotient, eax
+	mov		remainder, edx
+
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET divide
+	call	WriteString
 	mov		eax, secondNum
 	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString
-	mov		edx, OFFSET remainder
+	mov		eax, quotient
+	call	WriteDec
+	mov		edx, OFFSET remain
 	call	WriteString
+	mov		eax, remainder
+	call	WriteDec
 	call	CrLf
 
 ; --------------- EXTRA CREDIT 2 -----------------------
@@ -152,10 +178,10 @@ main PROC
 
 ; Display a terminating message
 	mov		edx, OFFSET outro
+	call	WriteString
+	call	CrLf
 
 	exit	; exit to operating system
 main ENDP
-
-; (insert additional procedures here)
 
 END main

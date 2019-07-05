@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 17:39:41
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 18:04:25
 5Program #1: Elementary Arithmetic      (project1.asm	     Page 1 - 1
 
 
@@ -166,11 +166,12 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 17:39:41
 				;	call	CrLf
 				; --------------- END EC 1 -----------------------
 
-				; TODO Calculate and print sum
+				; Calculate and print sum
  00000064  A1 000000E5 R		mov		eax, firstNum
  00000069  03 05 000000E9 R		add		eax, secondNum
  0000006F  A3 000000D1 R		mov		sum, eax
 
+				; NOTE: WriteInt will also print the sign
  00000074  A1 000000E5 R		mov		eax, firstNum
  00000079  E8 00000000 E		call	WriteDec
  0000007E  BA 000000B5 R		mov		edx, OFFSET plus
@@ -180,51 +181,98 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 17:39:41
  00000092  BA 000000B9 R		mov		edx, OFFSET equals
  00000097  E8 00000000 E		call	WriteString
  0000009C  A1 000000D1 R		mov		eax, sum
- 000000A1  E8 00000000 E		call	WriteInt
+ 000000A1  E8 00000000 E		call	WriteDec
  000000A6  E8 00000000 E		call	CrLf
 
-				; TODO calculate and print difference
- 000000AB  BA 000000B1 R		mov		edx, OFFSET minus
- 000000B0  BA 000000B9 R		mov		edx, OFFSET equals
- 000000B5  E8 00000000 E		call	WriteString
- 000000BA  E8 00000000 E		call	CrLf
+				; calculate and print difference
+ 000000AB  A1 000000E5 R		mov		eax, firstNum
+ 000000B0  2B 05 000000E9 R		sub		eax, secondNum
+ 000000B6  A3 000000D5 R		mov		difference, eax	
 
-				; TODO calculate and print product
- 000000BF  BA 000000C1 R		mov		edx, OFFSET multiply
- 000000C4  BA 000000B9 R		mov		edx, OFFSET equals
- 000000C9  E8 00000000 E		call	WriteString
- 000000CE  E8 00000000 E		call	CrLf
+ 000000BB  A1 000000E5 R		mov		eax, firstNum
+ 000000C0  E8 00000000 E		call	WriteDec
+ 000000C5  BA 000000B1 R		mov		edx, OFFSET minus
+ 000000CA  E8 00000000 E		call	WriteString
+ 000000CF  A1 000000E9 R		mov		eax, secondNum
+ 000000D4  E8 00000000 E		call	WriteDec
+ 000000D9  BA 000000B9 R		mov		edx, OFFSET equals
+ 000000DE  E8 00000000 E		call	WriteString
+ 000000E3  A1 000000D5 R		mov		eax, difference
+ 000000E8  E8 00000000 E		call	WriteDec
+ 000000ED  E8 00000000 E		call	CrLf
+
+				; calculate and print product
+ 000000F2  A1 000000E5 R		mov		eax, firstNum
+ 000000F7  F7 25 000000E9 R		mul		secondNum
+ 000000FD  A3 000000D9 R		mov		product, eax
+
+ 00000102  A1 000000E5 R		mov		eax, firstNum
+ 00000107  E8 00000000 E		call	WriteDec
+ 0000010C  BA 000000C1 R		mov		edx, OFFSET multiply
+ 00000111  E8 00000000 E		call	WriteString
+ 00000116  A1 000000E9 R		mov		eax, secondNum
+ 0000011B  E8 00000000 E		call	WriteDec
+ 00000120  BA 000000B9 R		mov		edx, OFFSET equals
+ 00000125  E8 00000000 E		call	WriteString
+ 0000012A  A1 000000D9 R		mov		eax, product
+ 0000012F  E8 00000000 E		call	WriteDec
+ 00000134  E8 00000000 E		call	CrLf
 
 				; TODO calculate and print (integer) quotient and remainder
- 000000D3  BA 000000BD R		mov		edx, OFFSET divide
- 000000D8  BA 000000B9 R		mov		edx, OFFSET equals
- 000000DD  BA 000000E1 R		mov		edx, OFFSET remainder
- 000000E2  E8 00000000 E		call	WriteString
- 000000E7  E8 00000000 E		call	CrLf
+ 00000139  A1 000000E5 R		mov		eax, firstNum
+ 0000013E  8B 1D 000000E9 R		mov		ebx, secondNum
+ 00000144  BA 00000000			mov		edx, 0			; initialize remainder container
+ 00000149  F7 F3			div		ebx
+ 0000014B  A3 000000DD R		mov		quotient, eax
+ 00000150  89 15 000000E1 R		mov		remainder, edx
+
+ 00000156  A1 000000E5 R		mov		eax, firstNum
+ 0000015B  E8 00000000 E		call	WriteDec
+ 00000160  BA 000000BD R		mov		edx, OFFSET divide
+ 00000165  E8 00000000 E		call	WriteString
+ 0000016A  A1 000000E9 R		mov		eax, secondNum
+ 0000016F  E8 00000000 E		call	WriteDec
+ 00000174  BA 000000B9 R		mov		edx, OFFSET equals
+ 00000179  E8 00000000 E		call	WriteString
+ 0000017E  A1 000000DD R		mov		eax, quotient
+ 00000183  E8 00000000 E		call	WriteDec
+ 00000188  BA 000000C5 R		mov		edx, OFFSET remain
+ 0000018D  E8 00000000 E		call	WriteString
+ 00000192  A1 000000E1 R		mov		eax, remainder
+ 00000197  E8 00000000 E		call	WriteDec
+ 0000019C  E8 00000000 E		call	CrLf
 
 				; --------------- EXTRA CREDIT 2 -----------------------
 				; TODO Display the square of each number
- 000000EC  BA 00000182 R		mov		edx, OFFSET square
- 000000F1  E8 00000000 E		call	WriteString
- 000000F6  E8 00000000 E		call	CrLf
+ 000001A1  BA 00000182 R		mov		edx, OFFSET square
+ 000001A6  E8 00000000 E		call	WriteString
+ 000001AB  A1 000000E5 R		mov		eax, firstNum
+ 000001B0  E8 00000000 E		call	WriteDec
+ 000001B5  BA 000000B9 R		mov		edx, OFFSET equals
+ 000001BA  E8 00000000 E		call	WriteString
+ 000001BF  E8 00000000 E		call	CrLf
 
- 000000FB  BA 00000182 R		mov		edx, OFFSET square
- 00000100  E8 00000000 E		call	WriteString
- 00000105  E8 00000000 E		call	CrLf
+ 000001C4  BA 00000182 R		mov		edx, OFFSET square
+ 000001C9  E8 00000000 E		call	WriteString
+ 000001CE  A1 000000E9 R		mov		eax, secondNum
+ 000001D3  E8 00000000 E		call	WriteDec
+ 000001D8  BA 000000B9 R		mov		edx, OFFSET equals
+ 000001DD  E8 00000000 E		call	WriteString	
+ 000001E2  E8 00000000 E		call	CrLf
 				; --------------- END EC 2 -----------------------
 
 				; Display a terminating message
- 0000010A  BA 00000083 R		mov		edx, OFFSET outro
+ 000001E7  BA 00000083 R		mov		edx, OFFSET outro
+ 000001EC  E8 00000000 E		call	WriteString
+ 000001F1  E8 00000000 E		call	CrLf
 
 					exit	; exit to operating system
- 0000010F  6A 00	   *	    push   +000000000h
- 00000111  E8 00000000 E   *	    call   ExitProcess
- 00000116			main ENDP
-
-				; (insert additional procedures here)
+ 000001F6  6A 00	   *	    push   +000000000h
+ 000001F8  E8 00000000 E   *	    call   ExitProcess
+ 000001FD			main ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 17:39:41
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 18:04:25
 5Program #1: Elementary Arithmetic      (project1.asm	     Symbols 2 - 1
 
 
@@ -319,7 +367,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000191 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000116 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001FD Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -426,7 +474,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000116 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000001FD Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
