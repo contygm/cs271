@@ -36,9 +36,9 @@ firstNum	DWORD	?
 secondNum	DWORD	?
 
 ; EC Data
-intro_EC_1 	BYTE	"**EC: Program verifies second number less than first.",0
-intro_EC_2 	BYTE	"**EC: Program displays square of inputted numbers.",0
-notValid	BYTE	"The value is not less than the first number",0
+intro_EC_1 	BYTE	"**EC: Program verifies second number is less than first.",0
+intro_EC_2 	BYTE	"**EC: Program squares both numbers.",0
+notValid	BYTE	"The second number must be less than the first!",0
 square		BYTE	"Square of ",0
 squared		DWORD	?
 
@@ -75,10 +75,11 @@ main PROC
 	mov		secondNum, eax
 
 ; --------------- EXTRA CREDIT 1 -----------------------
-; TODO Validate the second number to be less than the first
-;	mov		edx, OFFSET notValid
-;	call	WriteString
-;	call	CrLf
+; Validate the second number to be less than the first
+	mov		eax, firstNum
+	cmp		eax, secondNum
+	jle		valError
+	
 ; --------------- END EC 1 -----------------------
 
 ; Calculate and print sum
@@ -158,14 +159,24 @@ main PROC
 	call	CrLf
 
 ; --------------- EXTRA CREDIT 2 -----------------------
-; TODO Display the square of each number
+; Display the square of each number
+	mov		eax, firstNum
+	mul		firstNum
+	mov		squared, eax
+
 	mov		edx, OFFSET square
 	call	WriteString
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString
+	mov		eax, squared
+	call	WriteDec
 	call	CrLf
+
+	mov		eax, secondNum
+	mul		secondNum
+	mov		squared, eax
 
 	mov		edx, OFFSET square
 	call	WriteString
@@ -173,9 +184,16 @@ main PROC
 	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString	
+	mov		eax, squared
+	call	WriteDec
 	call	CrLf
 ; --------------- END EC 2 -----------------------
+valError:
+	mov		edx, OFFSET notValid
+	call	WriteString
+	call	CrLf
 
+terminate:
 ; Display a terminating message
 	mov		edx, OFFSET outro
 	call	WriteString
