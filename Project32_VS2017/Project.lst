@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 18:19:19
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/07/19 15:56:51
 5Program #1: Elementary Arithmetic      (project1.asm	     Page 1 - 1
 
 
@@ -124,16 +124,21 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 18:19:19
  00000179 53 71 75 61 72	square		BYTE	"Square of ",0
 	   65 20 6F 66 20
 	   00
- 00000184 00000000		squared		DWORD	?
+ 00000184 00000000		firstNumSq	DWORD	?
+ 00000188 00000000		secondNumSq DWORD	?
 
  00000000			.code
  00000000			main PROC
 
-				; Display your name, program title, and EC notices
+				; ---------------------------------------------
+				; introduction section
+				; ---------------------------------------------
+				; Display your name and program title
  00000000  BA 00000000 R		mov		edx, OFFSET intro_1
  00000005  E8 00000000 E		call	WriteString
  0000000A  E8 00000000 E		call	CrLf
-					
+
+				; Display EC notices
  0000000F  BA 000000ED R		mov		edx, OFFSET intro_EC_1
  00000014  E8 00000000 E		call	WriteString
  00000019  E8 00000000 E		call	CrLf
@@ -147,149 +152,169 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 18:19:19
  00000032  E8 00000000 E		call	WriteString
  00000037  E8 00000000 E		call	CrLf
 
-				; Prompt the user to enter two numbers
+				; ---------------------------------------------
+				; Data section
+				; ---------------------------------------------
+				; Prompt the user to enter first number
  0000003C  BA 00000092 R		mov		edx, OFFSET prompt_1
  00000041  E8 00000000 E		call	WriteString
  00000046  E8 00000000 E		call	ReadInt
  0000004B  A3 000000E5 R		mov		firstNum, eax
 
+				; Prompt the user to enter second number
  00000050  BA 000000A1 R		mov		edx, OFFSET prompt_2
  00000055  E8 00000000 E		call	WriteString
  0000005A  E8 00000000 E		call	ReadInt
  0000005F  A3 000000E9 R		mov		secondNum, eax
 
-				; --------------- EXTRA CREDIT 1 -----------------------
-				; Validate the second number to be less than the first
+				; Validate the second number is less than the first
  00000064  A1 000000E5 R		mov		eax, firstNum
  00000069  3B 05 000000E9 R		cmp		eax, secondNum
- 0000006F  0F 8E 000001B7		jle		valError
+ 0000006F  0F 8E 000001B9		jle		valError
 					
-				; --------------- END EC 1 -----------------------
-
-				; Calculate and print sum
+				; ---------------------------------------------
+				; Calculations section
+				; ---------------------------------------------
+				; Calculate sum
  00000075  A1 000000E5 R		mov		eax, firstNum
  0000007A  03 05 000000E9 R		add		eax, secondNum
  00000080  A3 000000D1 R		mov		sum, eax
 
-				; NOTE: WriteInt will also print the sign
- 00000085  A1 000000E5 R		mov		eax, firstNum
- 0000008A  E8 00000000 E		call	WriteDec
- 0000008F  BA 000000B5 R		mov		edx, OFFSET plus
- 00000094  E8 00000000 E		call	WriteString
- 00000099  A1 000000E9 R		mov		eax, secondNum
- 0000009E  E8 00000000 E		call	WriteDec
- 000000A3  BA 000000B9 R		mov		edx, OFFSET equals
- 000000A8  E8 00000000 E		call	WriteString
- 000000AD  A1 000000D1 R		mov		eax, sum
- 000000B2  E8 00000000 E		call	WriteDec
- 000000B7  E8 00000000 E		call	CrLf
-
 				; calculate and print difference
- 000000BC  A1 000000E5 R		mov		eax, firstNum
- 000000C1  2B 05 000000E9 R		sub		eax, secondNum
- 000000C7  A3 000000D5 R		mov		difference, eax	
+ 00000085  A1 000000E5 R		mov		eax, firstNum
+ 0000008A  2B 05 000000E9 R		sub		eax, secondNum
+ 00000090  A3 000000D5 R		mov		difference, eax	
 
- 000000CC  A1 000000E5 R		mov		eax, firstNum
- 000000D1  E8 00000000 E		call	WriteDec
- 000000D6  BA 000000B1 R		mov		edx, OFFSET minus
- 000000DB  E8 00000000 E		call	WriteString
- 000000E0  A1 000000E9 R		mov		eax, secondNum
- 000000E5  E8 00000000 E		call	WriteDec
- 000000EA  BA 000000B9 R		mov		edx, OFFSET equals
- 000000EF  E8 00000000 E		call	WriteString
- 000000F4  A1 000000D5 R		mov		eax, difference
- 000000F9  E8 00000000 E		call	WriteDec
- 000000FE  E8 00000000 E		call	CrLf
+				; calculate product
+ 00000095  A1 000000E5 R		mov		eax, firstNum
+ 0000009A  F7 25 000000E9 R		mul		secondNum
+ 000000A0  A3 000000D9 R		mov		product, eax
 
-				; calculate and print product
- 00000103  A1 000000E5 R		mov		eax, firstNum
- 00000108  F7 25 000000E9 R		mul		secondNum
- 0000010E  A3 000000D9 R		mov		product, eax
+				; calculate (integer) quotient and remainder
+ 000000A5  A1 000000E5 R		mov		eax, firstNum
+ 000000AA  8B 1D 000000E9 R		mov		ebx, secondNum
+ 000000B0  BA 00000000			mov		edx, 0			; initialize remainder container
+ 000000B5  F7 F3			div		ebx
+ 000000B7  A3 000000DD R		mov		quotient, eax
+ 000000BC  89 15 000000E1 R		mov		remainder, edx
 
- 00000113  A1 000000E5 R		mov		eax, firstNum
- 00000118  E8 00000000 E		call	WriteDec
- 0000011D  BA 000000C1 R		mov		edx, OFFSET multiply
- 00000122  E8 00000000 E		call	WriteString
- 00000127  A1 000000E9 R		mov		eax, secondNum
- 0000012C  E8 00000000 E		call	WriteDec
- 00000131  BA 000000B9 R		mov		edx, OFFSET equals
- 00000136  E8 00000000 E		call	WriteString
- 0000013B  A1 000000D9 R		mov		eax, product
- 00000140  E8 00000000 E		call	WriteDec
- 00000145  E8 00000000 E		call	CrLf
+				; calculate the square of the first number
+ 000000C2  A1 000000E5 R		mov		eax, firstNum
+ 000000C7  F7 25 000000E5 R		mul		firstNum
+ 000000CD  A3 00000184 R		mov		firstNumSq, eax
 
-				; calculate and print (integer) quotient and remainder
- 0000014A  A1 000000E5 R		mov		eax, firstNum
- 0000014F  8B 1D 000000E9 R		mov		ebx, secondNum
- 00000155  BA 00000000			mov		edx, 0			; initialize remainder container
- 0000015A  F7 F3			div		ebx
- 0000015C  A3 000000DD R		mov		quotient, eax
- 00000161  89 15 000000E1 R		mov		remainder, edx
+				; calculate the square of the second number
+ 000000D2  A1 000000E9 R		mov		eax, secondNum
+ 000000D7  F7 25 000000E9 R		mul		secondNum
+ 000000DD  A3 00000188 R		mov		secondNumSq, eax
 
- 00000167  A1 000000E5 R		mov		eax, firstNum
- 0000016C  E8 00000000 E		call	WriteDec
- 00000171  BA 000000BD R		mov		edx, OFFSET divide
- 00000176  E8 00000000 E		call	WriteString
- 0000017B  A1 000000E9 R		mov		eax, secondNum
- 00000180  E8 00000000 E		call	WriteDec
- 00000185  BA 000000B9 R		mov		edx, OFFSET equals
- 0000018A  E8 00000000 E		call	WriteString
- 0000018F  A1 000000DD R		mov		eax, quotient
- 00000194  E8 00000000 E		call	WriteDec
- 00000199  BA 000000C5 R		mov		edx, OFFSET remain
- 0000019E  E8 00000000 E		call	WriteString
- 000001A3  A1 000000E1 R		mov		eax, remainder
- 000001A8  E8 00000000 E		call	WriteDec
- 000001AD  E8 00000000 E		call	CrLf
+				; ---------------------------------------------
+				; display results section
+				; ---------------------------------------------
 
-				; --------------- EXTRA CREDIT 2 -----------------------
-				; Display the square of each number
- 000001B2  A1 000000E5 R		mov		eax, firstNum
- 000001B7  F7 25 000000E5 R		mul		firstNum
- 000001BD  A3 00000184 R		mov		squared, eax
+				; NOTE: WriteInt will also print the sign
 
- 000001C2  BA 00000179 R		mov		edx, OFFSET square
- 000001C7  E8 00000000 E		call	WriteString
- 000001CC  A1 000000E5 R		mov		eax, firstNum
- 000001D1  E8 00000000 E		call	WriteDec
- 000001D6  BA 000000B9 R		mov		edx, OFFSET equals
- 000001DB  E8 00000000 E		call	WriteString
- 000001E0  A1 00000184 R		mov		eax, squared
- 000001E5  E8 00000000 E		call	WriteDec
- 000001EA  E8 00000000 E		call	CrLf
+				; print sum
+ 000000E2  A1 000000E5 R		mov		eax, firstNum
+ 000000E7  E8 00000000 E		call	WriteDec
+ 000000EC  BA 000000B5 R		mov		edx, OFFSET plus
+ 000000F1  E8 00000000 E		call	WriteString
+ 000000F6  A1 000000E9 R		mov		eax, secondNum
+ 000000FB  E8 00000000 E		call	WriteDec
+ 00000100  BA 000000B9 R		mov		edx, OFFSET equals
+ 00000105  E8 00000000 E		call	WriteString
+ 0000010A  A1 000000D1 R		mov		eax, sum
+ 0000010F  E8 00000000 E		call	WriteDec
+ 00000114  E8 00000000 E		call	CrLf
 
- 000001EF  A1 000000E9 R		mov		eax, secondNum
- 000001F4  F7 25 000000E9 R		mul		secondNum
- 000001FA  A3 00000184 R		mov		squared, eax
+				; print difference
+ 00000119  A1 000000E5 R		mov		eax, firstNum
+ 0000011E  E8 00000000 E		call	WriteDec
+ 00000123  BA 000000B1 R		mov		edx, OFFSET minus
+ 00000128  E8 00000000 E		call	WriteString
+ 0000012D  A1 000000E9 R		mov		eax, secondNum
+ 00000132  E8 00000000 E		call	WriteDec
+ 00000137  BA 000000B9 R		mov		edx, OFFSET equals
+ 0000013C  E8 00000000 E		call	WriteString
+ 00000141  A1 000000D5 R		mov		eax, difference
+ 00000146  E8 00000000 E		call	WriteDec
+ 0000014B  E8 00000000 E		call	CrLf
 
+				; print product
+ 00000150  A1 000000E5 R		mov		eax, firstNum
+ 00000155  E8 00000000 E		call	WriteDec
+ 0000015A  BA 000000C1 R		mov		edx, OFFSET multiply
+ 0000015F  E8 00000000 E		call	WriteString
+ 00000164  A1 000000E9 R		mov		eax, secondNum
+ 00000169  E8 00000000 E		call	WriteDec
+ 0000016E  BA 000000B9 R		mov		edx, OFFSET equals
+ 00000173  E8 00000000 E		call	WriteString
+ 00000178  A1 000000D9 R		mov		eax, product
+ 0000017D  E8 00000000 E		call	WriteDec
+ 00000182  E8 00000000 E		call	CrLf
+
+				; print (integer) quotient and remainder 
+ 00000187  A1 000000E5 R		mov		eax, firstNum
+ 0000018C  E8 00000000 E		call	WriteDec
+ 00000191  BA 000000BD R		mov		edx, OFFSET divide
+ 00000196  E8 00000000 E		call	WriteString
+ 0000019B  A1 000000E9 R		mov		eax, secondNum
+ 000001A0  E8 00000000 E		call	WriteDec
+ 000001A5  BA 000000B9 R		mov		edx, OFFSET equals
+ 000001AA  E8 00000000 E		call	WriteString
+ 000001AF  A1 000000DD R		mov		eax, quotient
+ 000001B4  E8 00000000 E		call	WriteDec
+ 000001B9  BA 000000C5 R		mov		edx, OFFSET remain
+ 000001BE  E8 00000000 E		call	WriteString
+ 000001C3  A1 000000E1 R		mov		eax, remainder
+ 000001C8  E8 00000000 E		call	WriteDec
+ 000001CD  E8 00000000 E		call	CrLf
+
+				; Display the square of first number
+ 000001D2  BA 00000179 R		mov		edx, OFFSET square
+ 000001D7  E8 00000000 E		call	WriteString
+ 000001DC  A1 000000E5 R		mov		eax, firstNum
+ 000001E1  E8 00000000 E		call	WriteDec
+ 000001E6  BA 000000B9 R		mov		edx, OFFSET equals
+ 000001EB  E8 00000000 E		call	WriteString
+ 000001F0  A1 00000184 R		mov		eax, firstNumSq
+ 000001F5  E8 00000000 E		call	WriteDec
+ 000001FA  E8 00000000 E		call	CrLf
+
+				; Display the square of second number
  000001FF  BA 00000179 R		mov		edx, OFFSET square
  00000204  E8 00000000 E		call	WriteString
  00000209  A1 000000E9 R		mov		eax, secondNum
  0000020E  E8 00000000 E		call	WriteDec
  00000213  BA 000000B9 R		mov		edx, OFFSET equals
  00000218  E8 00000000 E		call	WriteString	
- 0000021D  A1 00000184 R		mov		eax, squared
+ 0000021D  A1 00000188 R		mov		eax, secondNumSq
  00000222  E8 00000000 E		call	WriteDec
  00000227  E8 00000000 E		call	CrLf
-				; --------------- END EC 2 -----------------------
- 0000022C			valError:
- 0000022C  BA 0000014A R		mov		edx, OFFSET notValid
- 00000231  E8 00000000 E		call	WriteString
- 00000236  E8 00000000 E		call	CrLf
+ 0000022C  EB 0F			jmp		terminate		; skip validation error procedure
 
- 0000023B			terminate:
+				; ---------------------------------------------
+				; Say Goodbye section
+				; ---------------------------------------------
+				; validation error procedure
+ 0000022E			valError:
+ 0000022E  BA 0000014A R		mov		edx, OFFSET notValid
+ 00000233  E8 00000000 E		call	WriteString
+ 00000238  E8 00000000 E		call	CrLf
+
+ 0000023D			terminate:
 				; Display a terminating message
- 0000023B  BA 00000083 R		mov		edx, OFFSET outro
- 00000240  E8 00000000 E		call	WriteString
- 00000245  E8 00000000 E		call	CrLf
+ 0000023D  BA 00000083 R		mov		edx, OFFSET outro
+ 00000242  E8 00000000 E		call	WriteString
+ 00000247  E8 00000000 E		call	CrLf
 
 					exit	; exit to operating system
- 0000024A  6A 00	   *	    push   +000000000h
- 0000024C  E8 00000000 E   *	    call   ExitProcess
- 00000251			main ENDP
+ 0000024C  6A 00	   *	    push   +000000000h
+ 0000024E  E8 00000000 E   *	    call   ExitProcess
+ 00000253			main ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/04/19 18:19:19
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/07/19 15:56:51
 5Program #1: Elementary Arithmetic      (project1.asm	     Symbols 2 - 1
 
 
@@ -383,8 +408,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000188 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000251 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000018C Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000253 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -491,9 +516,9 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000251 Public STDCALL
-  valError . . . . . . . . . . .	L Near	 0000022C _TEXT	
-  terminate  . . . . . . . . . .	L Near	 0000023B _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000253 Public STDCALL
+  valError . . . . . . . . . . .	L Near	 0000022E _TEXT	
+  terminate  . . . . . . . . . .	L Near	 0000023D _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -720,6 +745,7 @@ difference . . . . . . . . . . .	DWord	 000000D5 _DATA
 divide . . . . . . . . . . . . .	Byte	 000000BD _DATA	
 equals . . . . . . . . . . . . .	Byte	 000000B9 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
+firstNumSq . . . . . . . . . . .	DWord	 00000184 _DATA	
 firstNum . . . . . . . . . . . .	DWord	 000000E5 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
@@ -746,8 +772,8 @@ quotient . . . . . . . . . . . .	DWord	 000000DD _DATA
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 remainder  . . . . . . . . . . .	DWord	 000000E1 _DATA	
 remain . . . . . . . . . . . . .	Byte	 000000C5 _DATA	
+secondNumSq  . . . . . . . . . .	DWord	 00000188 _DATA	
 secondNum  . . . . . . . . . . .	DWord	 000000E9 _DATA	
-squared  . . . . . . . . . . . .	DWord	 00000184 _DATA	
 square . . . . . . . . . . . . .	Byte	 00000179 _DATA	
 sum  . . . . . . . . . . . . . .	DWord	 000000D1 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   

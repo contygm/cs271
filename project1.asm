@@ -40,16 +40,21 @@ intro_EC_1 	BYTE	"**EC: Program verifies second number is less than first.",0
 intro_EC_2 	BYTE	"**EC: Program squares both numbers.",0
 notValid	BYTE	"The second number must be less than the first!",0
 square		BYTE	"Square of ",0
-squared		DWORD	?
+firstNumSq	DWORD	?
+secondNumSq DWORD	?
 
 .code
 main PROC
 
-; Display your name, program title, and EC notices
+; ---------------------------------------------
+; introduction section
+; ---------------------------------------------
+; Display your name and program title
 	mov		edx, OFFSET intro_1
 	call	WriteString
 	call	CrLf
-	
+
+; Display EC notices
 	mov		edx, OFFSET intro_EC_1
 	call	WriteString
 	call	CrLf
@@ -63,31 +68,69 @@ main PROC
 	call	WriteString
 	call	CrLf
 
-; Prompt the user to enter two numbers
+; ---------------------------------------------
+; Data section
+; ---------------------------------------------
+; Prompt the user to enter first number
 	mov		edx, OFFSET prompt_1
 	call	WriteString
 	call	ReadInt
 	mov		firstNum, eax
 
+; Prompt the user to enter second number
 	mov		edx, OFFSET prompt_2
 	call	WriteString
 	call	ReadInt
 	mov		secondNum, eax
 
-; --------------- EXTRA CREDIT 1 -----------------------
-; Validate the second number to be less than the first
+; Validate the second number is less than the first
 	mov		eax, firstNum
 	cmp		eax, secondNum
 	jle		valError
 	
-; --------------- END EC 1 -----------------------
-
-; Calculate and print sum
+; ---------------------------------------------
+; Calculations section
+; ---------------------------------------------
+; Calculate sum
 	mov		eax, firstNum
 	add		eax, secondNum
 	mov		sum, eax
 
+; calculate and print difference
+	mov		eax, firstNum
+	sub		eax, secondNum
+	mov		difference, eax	
+
+; calculate product
+	mov		eax, firstNum
+	mul		secondNum
+	mov		product, eax
+
+; calculate (integer) quotient and remainder
+	mov		eax, firstNum
+	mov		ebx, secondNum
+	mov		edx, 0			; initialize remainder container
+	div		ebx
+	mov		quotient, eax
+	mov		remainder, edx
+
+; calculate the square of the first number
+	mov		eax, firstNum
+	mul		firstNum
+	mov		firstNumSq, eax
+
+; calculate the square of the second number
+	mov		eax, secondNum
+	mul		secondNum
+	mov		secondNumSq, eax
+
+; ---------------------------------------------
+; display results section
+; ---------------------------------------------
+
 ; NOTE: WriteInt will also print the sign
+
+; print sum
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET plus
@@ -100,11 +143,7 @@ main PROC
 	call	WriteDec
 	call	CrLf
 
-; calculate and print difference
-	mov		eax, firstNum
-	sub		eax, secondNum
-	mov		difference, eax	
-
+; print difference
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET minus
@@ -117,11 +156,7 @@ main PROC
 	call	WriteDec
 	call	CrLf
 
-; calculate and print product
-	mov		eax, firstNum
-	mul		secondNum
-	mov		product, eax
-
+; print product
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET multiply
@@ -134,14 +169,7 @@ main PROC
 	call	WriteDec
 	call	CrLf
 
-; calculate and print (integer) quotient and remainder
-	mov		eax, firstNum
-	mov		ebx, secondNum
-	mov		edx, 0			; initialize remainder container
-	div		ebx
-	mov		quotient, eax
-	mov		remainder, edx
-
+; print (integer) quotient and remainder 
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET divide
@@ -158,36 +186,33 @@ main PROC
 	call	WriteDec
 	call	CrLf
 
-; --------------- EXTRA CREDIT 2 -----------------------
-; Display the square of each number
-	mov		eax, firstNum
-	mul		firstNum
-	mov		squared, eax
-
+; Display the square of first number
 	mov		edx, OFFSET square
 	call	WriteString
 	mov		eax, firstNum
 	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString
-	mov		eax, squared
+	mov		eax, firstNumSq
 	call	WriteDec
 	call	CrLf
 
-	mov		eax, secondNum
-	mul		secondNum
-	mov		squared, eax
-
+; Display the square of second number
 	mov		edx, OFFSET square
 	call	WriteString
 	mov		eax, secondNum
 	call	WriteDec
 	mov		edx, OFFSET equals
 	call	WriteString	
-	mov		eax, squared
+	mov		eax, secondNumSq
 	call	WriteDec
 	call	CrLf
-; --------------- END EC 2 -----------------------
+	jmp		terminate		; skip validation error procedure
+
+; ---------------------------------------------
+; Say Goodbye section
+; ---------------------------------------------
+; validation error procedure
 valError:
 	mov		edx, OFFSET notValid
 	call	WriteString
