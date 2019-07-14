@@ -16,11 +16,11 @@ INCLUDE Irvine32.inc
 ; prompts and error messages
 programTitle	BYTE	"Fibonacci Numbers",0
 author			BYTE	"Programmed by Genevieve Conty",0
-namePrompt		BYTE	"What’s your name?",0
+namePrompt		BYTE	"What is your name? ",0
 greeting		BYTE	"Hi, ",0
 instructions_0	BYTE	"Enter the number of Fibonacci terms to be displayed.",0
 instructions_1	BYTE	"Provide the number as an integer in the range [1 .. 46].",0
-termsPrompt		BYTE	"How many Fibonacci terms do you want?",0
+termsPrompt		BYTE	"How many Fibonacci terms do you want? ",0
 outOfRange		BYTE	"Out of range. Enter a number in [1 .. 46]",0
 partingPrompt	BYTE	"Results certified by GConty.",0
 goodbye			BYTE	"Goodbye, ",0
@@ -34,6 +34,7 @@ term_1			DWORD	1
 term_2			DWORD	1
 totalTerms		DWORD	?
 fiveSpaces		BYTE	"     ",0
+termsPerLine	BYTE	2			; account for initial terms in line
 
 .code
 main PROC
@@ -42,7 +43,7 @@ main PROC
 ; Display program title and author
 ; ---------------------------------------------
 introduction:
-	mov		edx. OFFSET programTitle
+	mov		edx, OFFSET programTitle
 	call	WriteString
 	call	CrLf
 
@@ -57,7 +58,6 @@ getUserInfo:
 	; get and store username
 	mov		edx, OFFSET namePrompt
 	call	WriteString
-	call	CrLf
 	mov		edx, OFFSET userName
 	mov		ecx, 20
 	call	ReadString
@@ -97,16 +97,13 @@ displayFibs:
 	jl		rangeError
 	je		single			; if only 1 term
 	cmp		eax, 2
-	je		double			; if only 2 term
+	je		double			; if only 2 terms
 
+	; print first two terms of fib
 	mov		eax, term_1
 	call	WriteDec
-	call	CrLf
-
 	mov		edx, OFFSET fiveSpaces
 	call	WriteString
-	call	CrLf
-
 	mov		eax, term_2
 	call	WriteDec
 	call	CrLf
@@ -115,14 +112,29 @@ displayFibs:
 	mov		eax, term_1
 	mov		ebx, term_2
 	mov		ecx, totalTerms
-	sub		ecx, 2
+	sub		ecx, 2				; accounts for two terms already handled
 
+; post test loop for fib sequence
 fibLoop:
-	mov		eax, term_1
-	add		term_2
-	mov		eax, term_2
+	inc		termsPerLine
+	add		eax, ebx		; add first and second terms
+	call	WriteDec
+	mov		edx, OFFSET	fiveSpaces
+	call	WriteString
+	
+	xchg	eax, ebx			; swap so summed value(eax) becomes second term
+	cmp		termsPerLine, 5		; check that line has <=5 terms
+	je		nextLine
 
-;	jmp		goodbye
+	loop	fibLoop
+	call	CrLf
+	jmp		farewell
+
+; make new line for fib printing
+nextLine:
+	call	CrLf
+	mov		termsPerLine, 0		; reset to term count to 0 for new line
+	jmp		fibLoop
 
 ; ---------------------------------------------
 ; Display range error
@@ -137,7 +149,7 @@ rangeError:
 ; print one term fib sequence
 ; --------------------------------------------
 single:
-	mov		edx, OFFSET	term_1
+	mov		eax, term_1
 	call	WriteDec
 	call	CrLf
 	jmp		farewell
@@ -146,11 +158,11 @@ single:
 ; print two term fib sequence
 ; --------------------------------------------
 double:
-	mov		edx, OFFSET term_1
+	mov		eax, term_1
 	call	WriteDec
 	mov		edx, OFFSET fiveSpaces
 	call	WriteString
-	mov		edx, OFFSET	term_2
+	mov		eax, term_2
 	call	WriteDec
 	call	CrLf
 

@@ -1,15 +1,15 @@
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/07/19 15:56:51
-5Program #1: Elementary Arithmetic      (project1.asm	     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:01:48
+!Fibonacci Numbers  (program2.asm			     Page 1 - 1
 
 
-				TITLE Program #1: Elementary Arithmetic      (project1.asm)
+				TITLE  Fibonacci Numbers  (program2.asm)
 
 				; Author: Genevieve Conty
-				; Last Modified: 07/07/2019
+				; Last Modified: 07/14/2019
 				; OSU email address: contyg@oregonstate.edu
 				; Course number/section: CS271-400
-				; Assignment Number: Program #1       Due Date: 07/07/2019
-				; Description: Introduce myself and calculate the sum, difference, product, (integer) quotient and remainder of the numbers.
+				; Assignment Number: Program #2                Due Date: 07/14/2019
+				; Description: Calculates Fibonacci sequence based on range given by user
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -30,292 +30,243 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/07/19 15:56:51
 			      C .LIST
 			      C 
 
+				; (insert constant definitions here)
+
  00000000			.data
 
-				; prompts
- 00000000 45 6C 65 6D 65	intro_1		BYTE	"Elementary Arithmetic by Genevieve Conty",0
-	   6E 74 61 72 79
-	   20 41 72 69 74
-	   68 6D 65 74 69
-	   63 20 62 79 20
-	   47 65 6E 65 76
-	   69 65 76 65 20
-	   43 6F 6E 74 79
-	   00
- 00000029 45 6E 74 65 72	intro_2		BYTE	"Enter 2 numbers, and I'll show you the sum, difference, product, quotient, and remainder.",0
-	   20 32 20 6E 75
-	   6D 62 65 72 73
-	   2C 20 61 6E 64
-	   20 49 27 6C 6C
-	   20 73 68 6F 77
-	   20 79 6F 75 20
-	   74 68 65 20 73
-	   75 6D 2C 20 64
-	   69 66 66 65 72
-	   65 6E 63 65 2C
-	   20 70 72 6F 64
-	   75 63 74 2C 20
-	   71 75 6F 74 69
-	   65 6E 74 2C 20
-	   61 6E 64 20 72
-	   65 6D 61 69 6E
-	   64 65 72 2E 00
- 00000083 49 6D 70 72 65	outro		BYTE	"Impressed? Bye",0
-	   73 73 65 64 3F
-	   20 42 79 65 00
- 00000092 46 69 72 73 74	prompt_1	BYTE	"First number: ",0
-	   20 6E 75 6D 62
-	   65 72 3A 20 00
- 000000A1 53 65 63 6F 6E	prompt_2	BYTE	"Second number: ",0
-	   64 20 6E 75 6D
-	   62 65 72 3A 20
-	   00
-
-				; math signs
- 000000B1 20 2D 20 00		minus		BYTE	" - ",0
- 000000B5 20 2B 20 00		plus		BYTE	" + ",0
- 000000B9 20 3D 20 00		equals		BYTE	" = ",0
- 000000BD 20 2F 20 00		divide		BYTE	" / ",0
- 000000C1 20 78 20 00		multiply	BYTE	" x ",0
- 000000C5 20 72 65 6D 61	remain		BYTE	" remainder ",0
-	   69 6E 64 65 72
-	   20 00
-
-				; math results
- 000000D1 00000000		sum			DWORD	?
- 000000D5 00000000		difference	DWORD	?
- 000000D9 00000000		product		DWORD	?
- 000000DD 00000000		quotient	DWORD	?
- 000000E1 00000000		remainder	DWORD	?
- 000000E5 00000000		firstNum	DWORD	?
- 000000E9 00000000		secondNum	DWORD	?
-
-				; EC Data
- 000000ED 2A 2A 45 43 3A	intro_EC_1 	BYTE	"**EC: Program verifies second number is less than first.",0
-	   20 50 72 6F 67
-	   72 61 6D 20 76
-	   65 72 69 66 69
-	   65 73 20 73 65
-	   63 6F 6E 64 20
-	   6E 75 6D 62 65
-	   72 20 69 73 20
-	   6C 65 73 73 20
-	   74 68 61 6E 20
-	   66 69 72 73 74
-	   2E 00
- 00000126 2A 2A 45 43 3A	intro_EC_2 	BYTE	"**EC: Program squares both numbers.",0
-	   20 50 72 6F 67
-	   72 61 6D 20 73
-	   71 75 61 72 65
-	   73 20 62 6F 74
-	   68 20 6E 75 6D
-	   62 65 72 73 2E
-	   00
- 0000014A 54 68 65 20 73	notValid	BYTE	"The second number must be less than the first!",0
-	   65 63 6F 6E 64
-	   20 6E 75 6D 62
-	   65 72 20 6D 75
-	   73 74 20 62 65
-	   20 6C 65 73 73
-	   20 74 68 61 6E
+				; prompts and error messages
+ 00000000 46 69 62 6F 6E	programTitle	BYTE	"Fibonacci Numbers",0
+	   61 63 63 69 20
+	   4E 75 6D 62 65
+	   72 73 00
+ 00000012 50 72 6F 67 72	author			BYTE	"Programmed by Genevieve Conty",0
+	   61 6D 6D 65 64
+	   20 62 79 20 47
+	   65 6E 65 76 69
+	   65 76 65 20 43
+	   6F 6E 74 79 00
+ 00000030 57 68 61 74 20	namePrompt		BYTE	"What is your name? ",0
+	   69 73 20 79 6F
+	   75 72 20 6E 61
+	   6D 65 3F 20 00
+ 00000044 48 69 2C 20 00	greeting		BYTE	"Hi, ",0
+ 00000049 45 6E 74 65 72	instructions_0	BYTE	"Enter the number of Fibonacci terms to be displayed.",0
 	   20 74 68 65 20
-	   66 69 72 73 74
-	   21 00
- 00000179 53 71 75 61 72	square		BYTE	"Square of ",0
-	   65 20 6F 66 20
+	   6E 75 6D 62 65
+	   72 20 6F 66 20
+	   46 69 62 6F 6E
+	   61 63 63 69 20
+	   74 65 72 6D 73
+	   20 74 6F 20 62
+	   65 20 64 69 73
+	   70 6C 61 79 65
+	   64 2E 00
+ 0000007E 50 72 6F 76 69	instructions_1	BYTE	"Provide the number as an integer in the range [1 .. 46].",0
+	   64 65 20 74 68
+	   65 20 6E 75 6D
+	   62 65 72 20 61
+	   73 20 61 6E 20
+	   69 6E 74 65 67
+	   65 72 20 69 6E
+	   20 74 68 65 20
+	   72 61 6E 67 65
+	   20 5B 31 20 2E
+	   2E 20 34 36 5D
+	   2E 00
+ 000000B7 48 6F 77 20 6D	termsPrompt		BYTE	"How many Fibonacci terms do you want? ",0
+	   61 6E 79 20 46
+	   69 62 6F 6E 61
+	   63 63 69 20 74
+	   65 72 6D 73 20
+	   64 6F 20 79 6F
+	   75 20 77 61 6E
+	   74 3F 20 00
+ 000000DE 4F 75 74 20 6F	outOfRange		BYTE	"Out of range. Enter a number in [1 .. 46]",0
+	   66 20 72 61 6E
+	   67 65 2E 20 45
+	   6E 74 65 72 20
+	   61 20 6E 75 6D
+	   62 65 72 20 69
+	   6E 20 5B 31 20
+	   2E 2E 20 34 36
+	   5D 00
+ 00000108 52 65 73 75 6C	partingPrompt	BYTE	"Results certified by GConty.",0
+	   74 73 20 63 65
+	   72 74 69 66 69
+	   65 64 20 62 79
+	   20 47 43 6F 6E
+	   74 79 2E 00
+ 00000125 47 6F 6F 64 62	goodbye			BYTE	"Goodbye, ",0
+	   79 65 2C 20 00
+
+
+				; constants and inputs
+ 0000012F  00000014 [		userName		BYTE	20 DUP(0)
+	    00
+	   ]
+ 00000143 0000002E		max				DWORD	46
+ 00000147 00000001		min				DWORD	1
+ 0000014B 00000001		term_1			DWORD	1	
+ 0000014F 00000001		term_2			DWORD	1
+ 00000153 00000000		totalTerms		DWORD	?
+ 00000157 20 20 20 20 20	fiveSpaces		BYTE	"     ",0
 	   00
- 00000184 00000000		firstNumSq	DWORD	?
- 00000188 00000000		secondNumSq DWORD	?
+ 0000015D 02			termsPerLine	BYTE	2			; account for initial terms in line
 
  00000000			.code
  00000000			main PROC
 
 				; ---------------------------------------------
-				; introduction section
+				; Display program title and author
 				; ---------------------------------------------
-				; Display your name and program title
- 00000000  BA 00000000 R		mov		edx, OFFSET intro_1
+ 00000000			introduction:
+ 00000000  BA 00000000 R		mov		edx, OFFSET programTitle
  00000005  E8 00000000 E		call	WriteString
  0000000A  E8 00000000 E		call	CrLf
 
-				; Display EC notices
- 0000000F  BA 000000ED R		mov		edx, OFFSET intro_EC_1
+ 0000000F  BA 00000012 R		mov		edx, OFFSET author
  00000014  E8 00000000 E		call	WriteString
  00000019  E8 00000000 E		call	CrLf
-					
- 0000001E  BA 00000126 R		mov		edx, OFFSET intro_EC_2
+
+				; ---------------------------------------------
+				; Get user name and display greeting
+				; ---------------------------------------------
+ 0000001E			getUserInfo:
+					; get and store username
+ 0000001E  BA 00000030 R		mov		edx, OFFSET namePrompt
  00000023  E8 00000000 E		call	WriteString
- 00000028  E8 00000000 E		call	CrLf
+ 00000028  BA 0000012F R		mov		edx, OFFSET userName
+ 0000002D  B9 00000014			mov		ecx, 20
+ 00000032  E8 00000000 E		call	ReadString
 
-				; Display instructions for the user
- 0000002D  BA 00000029 R		mov		edx, OFFSET intro_2
- 00000032  E8 00000000 E		call	WriteString
- 00000037  E8 00000000 E		call	CrLf
+					; personalized gretting
+ 00000037  BA 00000044 R		mov		edx, OFFSET	greeting
+ 0000003C  E8 00000000 E		call	WriteString
+ 00000041  BA 0000012F R		mov		edx, OFFSET	userName
+ 00000046  E8 00000000 E		call	WriteString
+ 0000004B  E8 00000000 E		call	CrLf
 
 				; ---------------------------------------------
-				; Data section
+				; Display program instructions
 				; ---------------------------------------------
-				; Prompt the user to enter first number
- 0000003C  BA 00000092 R		mov		edx, OFFSET prompt_1
- 00000041  E8 00000000 E		call	WriteString
- 00000046  E8 00000000 E		call	ReadInt
- 0000004B  A3 000000E5 R		mov		firstNum, eax
-
-				; Prompt the user to enter second number
- 00000050  BA 000000A1 R		mov		edx, OFFSET prompt_2
+ 00000050			displayInstructions:
+ 00000050  BA 00000049 R		mov		edx, OFFSET instructions_0
  00000055  E8 00000000 E		call	WriteString
- 0000005A  E8 00000000 E		call	ReadInt
- 0000005F  A3 000000E9 R		mov		secondNum, eax
+ 0000005A  E8 00000000 E		call	CrLf
 
-				; Validate the second number is less than the first
- 00000064  A1 000000E5 R		mov		eax, firstNum
- 00000069  3B 05 000000E9 R		cmp		eax, secondNum
- 0000006F  0F 8E 000001B9		jle		valError
+ 0000005F  BA 0000007E R		mov		edx, OFFSET instructions_1
+ 00000064  E8 00000000 E		call	WriteString
+ 00000069  E8 00000000 E		call	CrLf
+
+				; ---------------------------------------------
+				; Display the Fibonacci terms 
+				; ---------------------------------------------
+ 0000006E			displayFibs:
+ 0000006E  BA 000000B7 R		mov		edx, OFFSET termsPrompt
+ 00000073  E8 00000000 E		call	WriteString
+ 00000078  E8 00000000 E		call	ReadInt
+ 0000007D  A3 00000153 R		mov		totalTerms, eax
+
+					; validate totalTerms
+ 00000082  3B 05 00000143 R		cmp		eax, max		; if totalTerms > max
+ 00000088  0F 8F 00000086		jg		rangeError		
+ 0000008E  3B 05 00000147 R		cmp		eax, min		; if totalTerms < min
+ 00000094  7C 7E			jl		rangeError
+ 00000096  0F 84 0000008C		je		single			; if only 1 term
+ 0000009C  83 F8 02			cmp		eax, 2
+ 0000009F  0F 84 00000094		je		double			; if only 2 terms
+
+					; print first two terms of fib
+ 000000A5  A1 0000014B R		mov		eax, term_1
+ 000000AA  E8 00000000 E		call	WriteDec
+ 000000AF  BA 00000157 R		mov		edx, OFFSET fiveSpaces
+ 000000B4  E8 00000000 E		call	WriteString
+ 000000B9  A1 0000014F R		mov		eax, term_2
+ 000000BE  E8 00000000 E		call	WriteDec
+ 000000C3  E8 00000000 E		call	CrLf
+
+					; initialize loop variables
+ 000000C8  A1 0000014B R		mov		eax, term_1
+ 000000CD  8B 1D 0000014F R		mov		ebx, term_2
+ 000000D3  8B 0D 00000153 R		mov		ecx, totalTerms
+ 000000D9  83 E9 02			sub		ecx, 2				; accounts for two terms already handled
+
+				; post test loop for fib sequence
+ 000000DC			fibLoop:
+ 000000DC  FE 05 0000015D R		inc		termsPerLine
+ 000000E2  03 C3			add		eax, ebx		; add first and second terms
+ 000000E4  E8 00000000 E		call	WriteDec
+ 000000E9  BA 00000157 R		mov		edx, OFFSET	fiveSpaces
+ 000000EE  E8 00000000 E		call	WriteString
 					
-				; ---------------------------------------------
-				; Calculations section
-				; ---------------------------------------------
-				; Calculate sum
- 00000075  A1 000000E5 R		mov		eax, firstNum
- 0000007A  03 05 000000E9 R		add		eax, secondNum
- 00000080  A3 000000D1 R		mov		sum, eax
+ 000000F3  93				xchg	eax, ebx			; swap so summed value(eax) becomes second term
+ 000000F4  80 3D 0000015D R		cmp		termsPerLine, 5		; check that line has <=5 terms
+	   05
+ 000000FB  74 09			je		nextLine
 
-				; calculate and print difference
- 00000085  A1 000000E5 R		mov		eax, firstNum
- 0000008A  2B 05 000000E9 R		sub		eax, secondNum
- 00000090  A3 000000D5 R		mov		difference, eax	
+ 000000FD  E2 DD			loop	fibLoop
+ 000000FF  E8 00000000 E		call	CrLf
+ 00000104  EB 56			jmp		farewell
 
-				; calculate product
- 00000095  A1 000000E5 R		mov		eax, firstNum
- 0000009A  F7 25 000000E9 R		mul		secondNum
- 000000A0  A3 000000D9 R		mov		product, eax
-
-				; calculate (integer) quotient and remainder
- 000000A5  A1 000000E5 R		mov		eax, firstNum
- 000000AA  8B 1D 000000E9 R		mov		ebx, secondNum
- 000000B0  BA 00000000			mov		edx, 0			; initialize remainder container
- 000000B5  F7 F3			div		ebx
- 000000B7  A3 000000DD R		mov		quotient, eax
- 000000BC  89 15 000000E1 R		mov		remainder, edx
-
-				; calculate the square of the first number
- 000000C2  A1 000000E5 R		mov		eax, firstNum
- 000000C7  F7 25 000000E5 R		mul		firstNum
- 000000CD  A3 00000184 R		mov		firstNumSq, eax
-
-				; calculate the square of the second number
- 000000D2  A1 000000E9 R		mov		eax, secondNum
- 000000D7  F7 25 000000E9 R		mul		secondNum
- 000000DD  A3 00000188 R		mov		secondNumSq, eax
+				; make new line for fib printing
+ 00000106			nextLine:
+ 00000106  E8 00000000 E		call	CrLf
+ 0000010B  C6 05 0000015D R		mov		termsPerLine, 0		; reset to term count to 0 for new line
+	   00
+ 00000112  EB C8			jmp		fibLoop
 
 				; ---------------------------------------------
-				; display results section
-				; ---------------------------------------------
-
-				; NOTE: WriteInt will also print the sign
-
-				; print sum
- 000000E2  A1 000000E5 R		mov		eax, firstNum
- 000000E7  E8 00000000 E		call	WriteDec
- 000000EC  BA 000000B5 R		mov		edx, OFFSET plus
- 000000F1  E8 00000000 E		call	WriteString
- 000000F6  A1 000000E9 R		mov		eax, secondNum
- 000000FB  E8 00000000 E		call	WriteDec
- 00000100  BA 000000B9 R		mov		edx, OFFSET equals
- 00000105  E8 00000000 E		call	WriteString
- 0000010A  A1 000000D1 R		mov		eax, sum
- 0000010F  E8 00000000 E		call	WriteDec
- 00000114  E8 00000000 E		call	CrLf
-
-				; print difference
- 00000119  A1 000000E5 R		mov		eax, firstNum
- 0000011E  E8 00000000 E		call	WriteDec
- 00000123  BA 000000B1 R		mov		edx, OFFSET minus
- 00000128  E8 00000000 E		call	WriteString
- 0000012D  A1 000000E9 R		mov		eax, secondNum
- 00000132  E8 00000000 E		call	WriteDec
- 00000137  BA 000000B9 R		mov		edx, OFFSET equals
- 0000013C  E8 00000000 E		call	WriteString
- 00000141  A1 000000D5 R		mov		eax, difference
- 00000146  E8 00000000 E		call	WriteDec
- 0000014B  E8 00000000 E		call	CrLf
-
-				; print product
- 00000150  A1 000000E5 R		mov		eax, firstNum
- 00000155  E8 00000000 E		call	WriteDec
- 0000015A  BA 000000C1 R		mov		edx, OFFSET multiply
- 0000015F  E8 00000000 E		call	WriteString
- 00000164  A1 000000E9 R		mov		eax, secondNum
- 00000169  E8 00000000 E		call	WriteDec
- 0000016E  BA 000000B9 R		mov		edx, OFFSET equals
- 00000173  E8 00000000 E		call	WriteString
- 00000178  A1 000000D9 R		mov		eax, product
- 0000017D  E8 00000000 E		call	WriteDec
- 00000182  E8 00000000 E		call	CrLf
-
-				; print (integer) quotient and remainder 
- 00000187  A1 000000E5 R		mov		eax, firstNum
- 0000018C  E8 00000000 E		call	WriteDec
- 00000191  BA 000000BD R		mov		edx, OFFSET divide
- 00000196  E8 00000000 E		call	WriteString
- 0000019B  A1 000000E9 R		mov		eax, secondNum
- 000001A0  E8 00000000 E		call	WriteDec
- 000001A5  BA 000000B9 R		mov		edx, OFFSET equals
- 000001AA  E8 00000000 E		call	WriteString
- 000001AF  A1 000000DD R		mov		eax, quotient
- 000001B4  E8 00000000 E		call	WriteDec
- 000001B9  BA 000000C5 R		mov		edx, OFFSET remain
- 000001BE  E8 00000000 E		call	WriteString
- 000001C3  A1 000000E1 R		mov		eax, remainder
- 000001C8  E8 00000000 E		call	WriteDec
- 000001CD  E8 00000000 E		call	CrLf
-
-				; Display the square of first number
- 000001D2  BA 00000179 R		mov		edx, OFFSET square
- 000001D7  E8 00000000 E		call	WriteString
- 000001DC  A1 000000E5 R		mov		eax, firstNum
- 000001E1  E8 00000000 E		call	WriteDec
- 000001E6  BA 000000B9 R		mov		edx, OFFSET equals
- 000001EB  E8 00000000 E		call	WriteString
- 000001F0  A1 00000184 R		mov		eax, firstNumSq
- 000001F5  E8 00000000 E		call	WriteDec
- 000001FA  E8 00000000 E		call	CrLf
-
-				; Display the square of second number
- 000001FF  BA 00000179 R		mov		edx, OFFSET square
- 00000204  E8 00000000 E		call	WriteString
- 00000209  A1 000000E9 R		mov		eax, secondNum
- 0000020E  E8 00000000 E		call	WriteDec
- 00000213  BA 000000B9 R		mov		edx, OFFSET equals
- 00000218  E8 00000000 E		call	WriteString	
- 0000021D  A1 00000188 R		mov		eax, secondNumSq
- 00000222  E8 00000000 E		call	WriteDec
- 00000227  E8 00000000 E		call	CrLf
- 0000022C  EB 0F			jmp		terminate		; skip validation error procedure
+				; Display range error
+				; --------------------------------------------
+ 00000114			rangeError:
+ 00000114  BA 000000DE R		mov		edx, OFFSET outOfRange
+ 00000119  E8 00000000 E		call	WriteString
+ 0000011E  E8 00000000 E		call	CrLf
+ 00000123  E9 FFFFFF46			jmp		displayFibs
 
 				; ---------------------------------------------
-				; Say Goodbye section
-				; ---------------------------------------------
-				; validation error procedure
- 0000022E			valError:
- 0000022E  BA 0000014A R		mov		edx, OFFSET notValid
- 00000233  E8 00000000 E		call	WriteString
- 00000238  E8 00000000 E		call	CrLf
+				; print one term fib sequence
+				; --------------------------------------------
+ 00000128			single:
+ 00000128  A1 0000014B R		mov		eax, term_1
+ 0000012D  E8 00000000 E		call	WriteDec
+ 00000132  E8 00000000 E		call	CrLf
+ 00000137  EB 23			jmp		farewell
 
- 0000023D			terminate:
-				; Display a terminating message
- 0000023D  BA 00000083 R		mov		edx, OFFSET outro
- 00000242  E8 00000000 E		call	WriteString
- 00000247  E8 00000000 E		call	CrLf
+				; ---------------------------------------------
+				; print two term fib sequence
+				; --------------------------------------------
+ 00000139			double:
+ 00000139  A1 0000014B R		mov		eax, term_1
+ 0000013E  E8 00000000 E		call	WriteDec
+ 00000143  BA 00000157 R		mov		edx, OFFSET fiveSpaces
+ 00000148  E8 00000000 E		call	WriteString
+ 0000014D  A1 0000014F R		mov		eax, term_2
+ 00000152  E8 00000000 E		call	WriteDec
+ 00000157  E8 00000000 E		call	CrLf
+
+				; ---------------------------------------------
+				; Give goodbye message to user and exit
+				;	program
+				; ---------------------------------------------
+ 0000015C			farewell:
+ 0000015C  BA 00000108 R		mov		edx, OFFSET partingPrompt
+ 00000161  E8 00000000 E		call	WriteString
+ 00000166  E8 00000000 E		call	CrLf
+ 0000016B  BA 00000125 R		mov		edx, OFFSET	goodbye
+ 00000170  E8 00000000 E		call	WriteString
+ 00000175  BA 0000012F R		mov		edx, OFFSET	userName
+ 0000017A  E8 00000000 E		call	WriteString
+ 0000017F  E8 00000000 E		call	CrLf
 
 					exit	; exit to operating system
- 0000024C  6A 00	   *	    push   +000000000h
- 0000024E  E8 00000000 E   *	    call   ExitProcess
- 00000253			main ENDP
+ 00000184  6A 00	   *	    push   +000000000h
+ 00000186  E8 00000000 E   *	    call   ExitProcess
+ 0000018B			main ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/07/19 15:56:51
-5Program #1: Elementary Arithmetic      (project1.asm	     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:01:48
+!Fibonacci Numbers  (program2.asm			     Symbols 2 - 1
 
 
 
@@ -408,8 +359,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000018C Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000253 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000015E Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000018B Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -516,9 +467,17 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000253 Public STDCALL
-  valError . . . . . . . . . . .	L Near	 0000022E _TEXT	
-  terminate  . . . . . . . . . .	L Near	 0000023D _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000018B Public STDCALL
+  introduction . . . . . . . . .	L Near	 00000000 _TEXT	
+  getUserInfo  . . . . . . . . .	L Near	 0000001E _TEXT	
+  displayInstructions  . . . . .	L Near	 00000050 _TEXT	
+  displayFibs  . . . . . . . . .	L Near	 0000006E _TEXT	
+  fibLoop  . . . . . . . . . . .	L Near	 000000DC _TEXT	
+  nextLine . . . . . . . . . . .	L Near	 00000106 _TEXT	
+  rangeError . . . . . . . . . .	L Near	 00000114 _TEXT	
+  single . . . . . . . . . . . .	L Near	 00000128 _TEXT	
+  double . . . . . . . . . . . .	L Near	 00000139 _TEXT	
+  farewell . . . . . . . . . . .	L Near	 0000015C _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -737,22 +696,19 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
+author . . . . . . . . . . . . .	Byte	 00000012 _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-difference . . . . . . . . . . .	DWord	 000000D5 _DATA	
-divide . . . . . . . . . . . . .	Byte	 000000BD _DATA	
-equals . . . . . . . . . . . . .	Byte	 000000B9 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-firstNumSq . . . . . . . . . . .	DWord	 00000184 _DATA	
-firstNum . . . . . . . . . . . .	DWord	 000000E5 _DATA	
+fiveSpaces . . . . . . . . . . .	Byte	 00000157 _DATA	
+goodbye  . . . . . . . . . . . .	Byte	 00000125 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-intro_1  . . . . . . . . . . . .	Byte	 00000000 _DATA	
-intro_2  . . . . . . . . . . . .	Byte	 00000029 _DATA	
-intro_EC_1 . . . . . . . . . . .	Byte	 000000ED _DATA	
-intro_EC_2 . . . . . . . . . . .	Byte	 00000126 _DATA	
+greeting . . . . . . . . . . . .	Byte	 00000044 _DATA	
+instructions_0 . . . . . . . . .	Byte	 00000049 _DATA	
+instructions_1 . . . . . . . . .	Byte	 0000007E _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -760,22 +716,19 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-minus  . . . . . . . . . . . . .	Byte	 000000B1 _DATA	
-multiply . . . . . . . . . . . .	Byte	 000000C1 _DATA	
-notValid . . . . . . . . . . . .	Byte	 0000014A _DATA	
-outro  . . . . . . . . . . . . .	Byte	 00000083 _DATA	
-plus . . . . . . . . . . . . . .	Byte	 000000B5 _DATA	
-product  . . . . . . . . . . . .	DWord	 000000D9 _DATA	
-prompt_1 . . . . . . . . . . . .	Byte	 00000092 _DATA	
-prompt_2 . . . . . . . . . . . .	Byte	 000000A1 _DATA	
-quotient . . . . . . . . . . . .	DWord	 000000DD _DATA	
+max  . . . . . . . . . . . . . .	DWord	 00000143 _DATA	
+min  . . . . . . . . . . . . . .	DWord	 00000147 _DATA	
+namePrompt . . . . . . . . . . .	Byte	 00000030 _DATA	
+outOfRange . . . . . . . . . . .	Byte	 000000DE _DATA	
+partingPrompt  . . . . . . . . .	Byte	 00000108 _DATA	
+programTitle . . . . . . . . . .	Byte	 00000000 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-remainder  . . . . . . . . . . .	DWord	 000000E1 _DATA	
-remain . . . . . . . . . . . . .	Byte	 000000C5 _DATA	
-secondNumSq  . . . . . . . . . .	DWord	 00000188 _DATA	
-secondNum  . . . . . . . . . . .	DWord	 000000E9 _DATA	
-square . . . . . . . . . . . . .	Byte	 00000179 _DATA	
-sum  . . . . . . . . . . . . . .	DWord	 000000D1 _DATA	
+term_1 . . . . . . . . . . . . .	DWord	 0000014B _DATA	
+term_2 . . . . . . . . . . . . .	DWord	 0000014F _DATA	
+termsPerLine . . . . . . . . . .	Byte	 0000015D _DATA	
+termsPrompt  . . . . . . . . . .	Byte	 000000B7 _DATA	
+totalTerms . . . . . . . . . . .	DWord	 00000153 _DATA	
+userName . . . . . . . . . . . .	Byte	 0000012F _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
