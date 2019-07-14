@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:01:48
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:16:12
 !Fibonacci Numbers  (program2.asm			     Page 1 - 1
 
 
@@ -167,105 +167,107 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:01:48
  00000078  E8 00000000 E		call	ReadInt
  0000007D  A3 00000153 R		mov		totalTerms, eax
 
-					; validate totalTerms
+					; validate totalTerms with post-test setup
  00000082  3B 05 00000143 R		cmp		eax, max		; if totalTerms > max
- 00000088  0F 8F 00000086		jg		rangeError		
+ 00000088  0F 8F 00000091		jg		rangeError		
  0000008E  3B 05 00000147 R		cmp		eax, min		; if totalTerms < min
- 00000094  7C 7E			jl		rangeError
- 00000096  0F 84 0000008C		je		single			; if only 1 term
- 0000009C  83 F8 02			cmp		eax, 2
- 0000009F  0F 84 00000094		je		double			; if only 2 terms
+ 00000094  0F 8C 00000085		jl		rangeError
+ 0000009A  0F 84 00000093		je		single			; if only 1 term
+ 000000A0  83 F8 02			cmp		eax, 2
+ 000000A3  0F 84 0000009B		je		double			; if only 2 terms
 
 					; print first two terms of fib
- 000000A5  A1 0000014B R		mov		eax, term_1
- 000000AA  E8 00000000 E		call	WriteDec
- 000000AF  BA 00000157 R		mov		edx, OFFSET fiveSpaces
- 000000B4  E8 00000000 E		call	WriteString
- 000000B9  A1 0000014F R		mov		eax, term_2
- 000000BE  E8 00000000 E		call	WriteDec
- 000000C3  E8 00000000 E		call	CrLf
+ 000000A9  A1 0000014B R		mov		eax, term_1
+ 000000AE  E8 00000000 E		call	WriteDec
+ 000000B3  BA 00000157 R		mov		edx, OFFSET fiveSpaces
+ 000000B8  E8 00000000 E		call	WriteString
+ 000000BD  A1 0000014F R		mov		eax, term_2
+ 000000C2  E8 00000000 E		call	WriteDec
+ 000000C7  BA 00000157 R		mov		edx, OFFSET fiveSpaces
+ 000000CC  E8 00000000 E		call	WriteString
 
 					; initialize loop variables
- 000000C8  A1 0000014B R		mov		eax, term_1
- 000000CD  8B 1D 0000014F R		mov		ebx, term_2
- 000000D3  8B 0D 00000153 R		mov		ecx, totalTerms
- 000000D9  83 E9 02			sub		ecx, 2				; accounts for two terms already handled
+ 000000D1  A1 0000014B R		mov		eax, term_1
+ 000000D6  8B 1D 0000014F R		mov		ebx, term_2
+ 000000DC  8B 0D 00000153 R		mov		ecx, totalTerms
+ 000000E2  83 E9 02			sub		ecx, 2				; accounts for two terms already handled
 
-				; post test loop for fib sequence
- 000000DC			fibLoop:
- 000000DC  FE 05 0000015D R		inc		termsPerLine
- 000000E2  03 C3			add		eax, ebx		; add first and second terms
- 000000E4  E8 00000000 E		call	WriteDec
- 000000E9  BA 00000157 R		mov		edx, OFFSET	fiveSpaces
- 000000EE  E8 00000000 E		call	WriteString
+				; incremented loop for fib sequence
+ 000000E5			fibLoop:
+ 000000E5  FE 05 0000015D R		inc		termsPerLine
+ 000000EB  03 C3			add		eax, ebx		; add first and second terms
+ 000000ED  E8 00000000 E		call	WriteDec
+ 000000F2  BA 00000157 R		mov		edx, OFFSET	fiveSpaces
+ 000000F7  E8 00000000 E		call	WriteString
 					
- 000000F3  93				xchg	eax, ebx			; swap so summed value(eax) becomes second term
- 000000F4  80 3D 0000015D R		cmp		termsPerLine, 5		; check that line has <=5 terms
+ 000000FC  93				xchg	eax, ebx			; swap so summed value(eax) becomes second term
+ 000000FD  80 3D 0000015D R		cmp		termsPerLine, 5		; check that line has <=5 terms
 	   05
- 000000FB  74 09			je		nextLine
+ 00000104  74 09			je		nextLine
 
- 000000FD  E2 DD			loop	fibLoop
- 000000FF  E8 00000000 E		call	CrLf
- 00000104  EB 56			jmp		farewell
+ 00000106  E2 DD			loop	fibLoop
+ 00000108  E8 00000000 E		call	CrLf
+ 0000010D  EB 58			jmp		farewell
 
 				; make new line for fib printing
- 00000106			nextLine:
- 00000106  E8 00000000 E		call	CrLf
- 0000010B  C6 05 0000015D R		mov		termsPerLine, 0		; reset to term count to 0 for new line
+ 0000010F			nextLine:
+ 0000010F  E8 00000000 E		call	CrLf
+ 00000114  C6 05 0000015D R		mov		termsPerLine, 0		; reset to term count to 0 for new line
 	   00
- 00000112  EB C8			jmp		fibLoop
+ 0000011B  E2 C8			loop	fibLoop
+ 0000011D  EB 48			jmp		farewell
 
 				; ---------------------------------------------
 				; Display range error
 				; --------------------------------------------
- 00000114			rangeError:
- 00000114  BA 000000DE R		mov		edx, OFFSET outOfRange
- 00000119  E8 00000000 E		call	WriteString
- 0000011E  E8 00000000 E		call	CrLf
- 00000123  E9 FFFFFF46			jmp		displayFibs
+ 0000011F			rangeError:
+ 0000011F  BA 000000DE R		mov		edx, OFFSET outOfRange
+ 00000124  E8 00000000 E		call	WriteString
+ 00000129  E8 00000000 E		call	CrLf
+ 0000012E  E9 FFFFFF3B			jmp		displayFibs
 
 				; ---------------------------------------------
 				; print one term fib sequence
 				; --------------------------------------------
- 00000128			single:
- 00000128  A1 0000014B R		mov		eax, term_1
- 0000012D  E8 00000000 E		call	WriteDec
- 00000132  E8 00000000 E		call	CrLf
- 00000137  EB 23			jmp		farewell
+ 00000133			single:
+ 00000133  A1 0000014B R		mov		eax, term_1
+ 00000138  E8 00000000 E		call	WriteDec
+ 0000013D  E8 00000000 E		call	CrLf
+ 00000142  EB 23			jmp		farewell
 
 				; ---------------------------------------------
 				; print two term fib sequence
 				; --------------------------------------------
- 00000139			double:
- 00000139  A1 0000014B R		mov		eax, term_1
- 0000013E  E8 00000000 E		call	WriteDec
- 00000143  BA 00000157 R		mov		edx, OFFSET fiveSpaces
- 00000148  E8 00000000 E		call	WriteString
- 0000014D  A1 0000014F R		mov		eax, term_2
- 00000152  E8 00000000 E		call	WriteDec
- 00000157  E8 00000000 E		call	CrLf
+ 00000144			double:
+ 00000144  A1 0000014B R		mov		eax, term_1
+ 00000149  E8 00000000 E		call	WriteDec
+ 0000014E  BA 00000157 R		mov		edx, OFFSET fiveSpaces
+ 00000153  E8 00000000 E		call	WriteString
+ 00000158  A1 0000014F R		mov		eax, term_2
+ 0000015D  E8 00000000 E		call	WriteDec
+ 00000162  E8 00000000 E		call	CrLf
 
 				; ---------------------------------------------
 				; Give goodbye message to user and exit
 				;	program
 				; ---------------------------------------------
- 0000015C			farewell:
- 0000015C  BA 00000108 R		mov		edx, OFFSET partingPrompt
- 00000161  E8 00000000 E		call	WriteString
- 00000166  E8 00000000 E		call	CrLf
- 0000016B  BA 00000125 R		mov		edx, OFFSET	goodbye
- 00000170  E8 00000000 E		call	WriteString
- 00000175  BA 0000012F R		mov		edx, OFFSET	userName
- 0000017A  E8 00000000 E		call	WriteString
- 0000017F  E8 00000000 E		call	CrLf
+ 00000167			farewell:
+ 00000167  BA 00000108 R		mov		edx, OFFSET partingPrompt
+ 0000016C  E8 00000000 E		call	WriteString
+ 00000171  E8 00000000 E		call	CrLf
+ 00000176  BA 00000125 R		mov		edx, OFFSET	goodbye
+ 0000017B  E8 00000000 E		call	WriteString
+ 00000180  BA 0000012F R		mov		edx, OFFSET	userName
+ 00000185  E8 00000000 E		call	WriteString
+ 0000018A  E8 00000000 E		call	CrLf
 
 					exit	; exit to operating system
- 00000184  6A 00	   *	    push   +000000000h
- 00000186  E8 00000000 E   *	    call   ExitProcess
- 0000018B			main ENDP
+ 0000018F  6A 00	   *	    push   +000000000h
+ 00000191  E8 00000000 E   *	    call   ExitProcess
+ 00000196			main ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:01:48
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:16:12
 !Fibonacci Numbers  (program2.asm			     Symbols 2 - 1
 
 
@@ -360,7 +362,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000015E Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000018B Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000196 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -467,17 +469,17 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000018B Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000196 Public STDCALL
   introduction . . . . . . . . .	L Near	 00000000 _TEXT	
   getUserInfo  . . . . . . . . .	L Near	 0000001E _TEXT	
   displayInstructions  . . . . .	L Near	 00000050 _TEXT	
   displayFibs  . . . . . . . . .	L Near	 0000006E _TEXT	
-  fibLoop  . . . . . . . . . . .	L Near	 000000DC _TEXT	
-  nextLine . . . . . . . . . . .	L Near	 00000106 _TEXT	
-  rangeError . . . . . . . . . .	L Near	 00000114 _TEXT	
-  single . . . . . . . . . . . .	L Near	 00000128 _TEXT	
-  double . . . . . . . . . . . .	L Near	 00000139 _TEXT	
-  farewell . . . . . . . . . . .	L Near	 0000015C _TEXT	
+  fibLoop  . . . . . . . . . . .	L Near	 000000E5 _TEXT	
+  nextLine . . . . . . . . . . .	L Near	 0000010F _TEXT	
+  rangeError . . . . . . . . . .	L Near	 0000011F _TEXT	
+  single . . . . . . . . . . . .	L Near	 00000133 _TEXT	
+  double . . . . . . . . . . . .	L Near	 00000144 _TEXT	
+  farewell . . . . . . . . . . .	L Near	 00000167 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C

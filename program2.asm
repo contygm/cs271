@@ -90,7 +90,7 @@ displayFibs:
 	call	ReadInt
 	mov		totalTerms, eax
 
-	; validate totalTerms
+	; validate totalTerms with post-test setup
 	cmp		eax, max		; if totalTerms > max
 	jg		rangeError		
 	cmp		eax, min		; if totalTerms < min
@@ -106,7 +106,8 @@ displayFibs:
 	call	WriteString
 	mov		eax, term_2
 	call	WriteDec
-	call	CrLf
+	mov		edx, OFFSET fiveSpaces
+	call	WriteString
 
 	; initialize loop variables
 	mov		eax, term_1
@@ -114,7 +115,7 @@ displayFibs:
 	mov		ecx, totalTerms
 	sub		ecx, 2				; accounts for two terms already handled
 
-; post test loop for fib sequence
+; incremented loop for fib sequence
 fibLoop:
 	inc		termsPerLine
 	add		eax, ebx		; add first and second terms
@@ -134,7 +135,8 @@ fibLoop:
 nextLine:
 	call	CrLf
 	mov		termsPerLine, 0		; reset to term count to 0 for new line
-	jmp		fibLoop
+	loop	fibLoop
+	jmp		farewell
 
 ; ---------------------------------------------
 ; Display range error
