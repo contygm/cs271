@@ -1,15 +1,15 @@
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 22:09:12
-!Fibonacci Numbers  (program2.asm			     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 17:57:35
+/Composite Number Spreadsheet     (program3.asm		     Page 1 - 1
 
 
-				TITLE  Fibonacci Numbers  (program2.asm)
+				TITLE Composite Number Spreadsheet     (program3.asm)
 
 				; Author: Genevieve Conty
-				; Last Modified: 07/14/2019
+				; Last Modified: 07/29/2019
 				; OSU email address: contyg@oregonstate.edu
 				; Course number/section: CS271-400
-				; Assignment Number: Program #2                Due Date: 07/14/2019
-				; Description: Calculates Fibonacci sequence based on range given by user
+				; Assignment Number: Program #3                Due Date: 07/28/2019
+				; Description: Calculate composite numbers between 1 and 300 based on user input.
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -30,245 +30,191 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 22:09:12
 			      C .LIST
 			      C 
 
-				; (insert constant definitions here)
+				; --------------------------------------------
+				; constant definitions for minimum and maximum
+				; --------------------------------------------
+ = 0000012C			MAX	= 300
+ = 00000001			MIN	= 1
 
  00000000			.data
 
-				; prompts and error messages
- 00000000 46 69 62 6F 6E	programTitle	BYTE	"Fibonacci Numbers",0
-	   61 63 63 69 20
+				; intro and exit prompts
+ 00000000 57 65 6C 63 6F	welcomeMsg		BYTE	"Welcome to the Composite Number Spreadsheet",0
+	   6D 65 20 74 6F
+	   20 74 68 65 20
+	   43 6F 6D 70 6F
+	   73 69 74 65 20
 	   4E 75 6D 62 65
-	   72 73 00
- 00000012 50 72 6F 67 72	author			BYTE	"Programmed by Genevieve Conty",0
+	   72 20 53 70 72
+	   65 61 64 73 68
+	   65 65 74 00
+ 0000002C 50 72 6F 67 72	programTitle	BYTE	"Programmed by Genevieve Conty",0
 	   61 6D 6D 65 64
 	   20 62 79 20 47
 	   65 6E 65 76 69
 	   65 76 65 20 43
 	   6F 6E 74 79 00
- 00000030 57 68 61 74 20	namePrompt		BYTE	"What is your name? ",0
-	   69 73 20 79 6F
-	   75 72 20 6E 61
-	   6D 65 3F 20 00
- 00000044 48 69 2C 20 00	greeting		BYTE	"Hi, ",0
- 00000049 45 6E 74 65 72	instructions_0	BYTE	"Enter the number of Fibonacci terms to be displayed.",0
-	   20 74 68 65 20
-	   6E 75 6D 62 65
-	   72 20 6F 66 20
-	   46 69 62 6F 6E
-	   61 63 63 69 20
-	   74 65 72 6D 73
-	   20 74 6F 20 62
-	   65 20 64 69 73
-	   70 6C 61 79 65
-	   64 2E 00
- 0000007E 50 72 6F 76 69	instructions_1	BYTE	"Provide the number as an integer in the range [1 .. 46].",0
-	   64 65 20 74 68
-	   65 20 6E 75 6D
-	   62 65 72 20 61
-	   73 20 61 6E 20
-	   69 6E 74 65 67
-	   65 72 20 69 6E
-	   20 74 68 65 20
-	   72 61 6E 67 65
-	   20 5B 31 20 2E
-	   2E 20 34 36 5D
+ 0000004A 2A 2A 45 43 3A	extraCreditMsg	BYTE	"**EC: Program allows user to choose to display only odd composites.",0
+	   20 50 72 6F 67
+	   72 61 6D 20 61
+	   6C 6C 6F 77 73
+	   20 75 73 65 72
+	   20 74 6F 20 63
+	   68 6F 6F 73 65
+	   20 74 6F 20 64
+	   69 73 70 6C 61
+	   79 20 6F 6E 6C
+	   79 20 6F 64 64
+	   20 63 6F 6D 70
+	   6F 73 69 74 65
+	   73 2E 00
+ 0000008E 54 68 69 73 20	description0	BYTE	"This program is capable of generating a list of composite numbers.",0
+	   70 72 6F 67 72
+	   61 6D 20 69 73
+	   20 63 61 70 61
+	   62 6C 65 20 6F
+	   66 20 67 65 6E
+	   65 72 61 74 69
+	   6E 67 20 61 20
+	   6C 69 73 74 20
+	   6F 66 20 63 6F
+	   6D 70 6F 73 69
+	   74 65 20 6E 75
+	   6D 62 65 72 73
 	   2E 00
- 000000B7 48 6F 77 20 6D	termsPrompt		BYTE	"How many Fibonacci terms do you want? ",0
-	   61 6E 79 20 46
-	   69 62 6F 6E 61
-	   63 63 69 20 74
-	   65 72 6D 73 20
+ 000000D1 53 69 6D 70 6C	description1	BYTE	"Simply let me know how many you would like to see.",0
+	   79 20 6C 65 74
+	   20 6D 65 20 6B
+	   6E 6F 77 20 68
+	   6F 77 20 6D 61
+	   6E 79 20 79 6F
+	   75 20 77 6F 75
+	   6C 64 20 6C 69
+	   6B 65 20 74 6F
+	   20 73 65 65 2E
+	   00
+ 00000104 49 92 6C 6C 20	directions		BYTE	"I’ll accept orders for up to 300 composites.",0
+	   61 63 63 65 70
+	   74 20 6F 72 64
+	   65 72 73 20 66
+	   6F 72 20 75 70
+	   20 74 6F 20 33
+	   30 30 20 63 6F
+	   6D 70 6F 73 69
+	   74 65 73 2E 00
+ 00000131 48 6F 77 20 6D	inputPrompt		BYTE	"How many composites do you want to view? [1 .. 300]: ",0
+	   61 6E 79 20 63
+	   6F 6D 70 6F 73
+	   69 74 65 73 20
 	   64 6F 20 79 6F
 	   75 20 77 61 6E
-	   74 3F 20 00
- 000000DE 4F 75 74 20 6F	outOfRange		BYTE	"Out of range. Enter a number in [1 .. 46]",0
+	   74 20 74 6F 20
+	   76 69 65 77 3F
+	   20 5B 31 20 2E
+	   2E 20 33 30 30
+	   5D 3A 20 00
+ 00000167 54 68 61 6E 6B	thanksMsg		BYTE	"Thanks for using my program!",0
+	   73 20 66 6F 72
+	   20 75 73 69 6E
+	   67 20 6D 79 20
+	   70 72 6F 67 72
+	   61 6D 21 00
+
+				; validation error 
+ 00000184 4F 75 74 20 6F	invalidMsg		BYTE	"Out of range. Please try again.",0
 	   66 20 72 61 6E
-	   67 65 2E 20 45
-	   6E 74 65 72 20
-	   61 20 6E 75 6D
-	   62 65 72 20 69
-	   6E 20 5B 31 20
-	   2E 2E 20 34 36
-	   5D 00
- 00000108 52 65 73 75 6C	partingPrompt	BYTE	"Results certified by GConty.",0
-	   74 73 20 63 65
-	   72 74 69 66 69
-	   65 64 20 62 79
-	   20 47 43 6F 6E
-	   74 79 2E 00
- 00000125 47 6F 6F 64 62	goodbye			BYTE	"Goodbye, ",0
-	   79 65 2C 20 00
-
-
-				; constants and inputs
- 0000012F  00000014 [		userName		BYTE	20 DUP(0)
-	    00
-	   ]
- 00000143 0000002E		max				DWORD	46
- 00000147 00000001		min				DWORD	1
- 0000014B 00000001		term_1			DWORD	1	
- 0000014F 00000001		term_2			DWORD	1
- 00000153 00000000		totalTerms		DWORD	?
- 00000157 20 20 20 20 20	fiveSpaces		BYTE	"     ",0
-	   00
- 0000015D 02			termsPerLine	BYTE	2			; account for initial terms in line
+	   67 65 2E 20 50
+	   6C 65 61 73 65
+	   20 74 72 79 20
+	   61 67 61 69 6E
+	   2E 00
 
  00000000			.code
  00000000			main PROC
 
-				; ---------------------------------------------
-				; Display program title and author
-				; ---------------------------------------------
+				; --------------------------------------------
+				; Display instructions and greeting
+				; --------------------------------------------
  00000000			introduction:
- 00000000  BA 00000000 R		mov		edx, OFFSET programTitle
+ 00000000  BA 00000000 R		mov		edx, OFFSET welcomeMsg
  00000005  E8 00000000 E		call	WriteString
  0000000A  E8 00000000 E		call	CrLf
 
- 0000000F  BA 00000012 R		mov		edx, OFFSET author
+ 0000000F  BA 0000002C R		mov		edx, OFFSET programTitle
  00000014  E8 00000000 E		call	WriteString
  00000019  E8 00000000 E		call	CrLf
 
-				; ---------------------------------------------
-				; Get user name and display greeting
-				; ---------------------------------------------
- 0000001E			getUserInfo:
-					; get and store username
- 0000001E  BA 00000030 R		mov		edx, OFFSET namePrompt
+ 0000001E  BA 0000008E R		mov		edx, OFFSET description0
  00000023  E8 00000000 E		call	WriteString
- 00000028  BA 0000012F R		mov		edx, OFFSET userName
- 0000002D  B9 00000014			mov		ecx, 20
- 00000032  E8 00000000 E		call	ReadString
+ 00000028  E8 00000000 E		call	CrLf
 
-					; personalized gretting
- 00000037  BA 00000044 R		mov		edx, OFFSET	greeting
- 0000003C  E8 00000000 E		call	WriteString
- 00000041  BA 0000012F R		mov		edx, OFFSET	userName
- 00000046  E8 00000000 E		call	WriteString
- 0000004B  E8 00000000 E		call	CrLf
+ 0000002D  BA 000000D1 R		mov		edx, OFFSET description1
+ 00000032  E8 00000000 E		call	WriteString
+ 00000037  E8 00000000 E		call	CrLf
 
-				; ---------------------------------------------
-				; Display program instructions
-				; ---------------------------------------------
- 00000050			displayInstructions:
- 00000050  BA 00000049 R		mov		edx, OFFSET instructions_0
- 00000055  E8 00000000 E		call	WriteString
- 0000005A  E8 00000000 E		call	CrLf
+ 0000003C  BA 00000104 R		mov		edx, OFFSET directions
+ 00000041  E8 00000000 E		call	WriteString
+ 00000046  E8 00000000 E		call	CrLf
 
- 0000005F  BA 0000007E R		mov		edx, OFFSET instructions_1
- 00000064  E8 00000000 E		call	WriteString
- 00000069  E8 00000000 E		call	CrLf
-
-				; ---------------------------------------------
-				; Display the Fibonacci terms 
-				; ---------------------------------------------
- 0000006E			displayFibs:
- 0000006E  BA 000000B7 R		mov		edx, OFFSET termsPrompt
- 00000073  E8 00000000 E		call	WriteString
- 00000078  E8 00000000 E		call	ReadInt
- 0000007D  A3 00000153 R		mov		totalTerms, eax
-
-					; validate totalTerms with post-test setup
- 00000082  3B 05 00000143 R		cmp		eax, max		; if totalTerms > max
- 00000088  0F 8F 00000091		jg		rangeError		
- 0000008E  3B 05 00000147 R		cmp		eax, min		; if totalTerms < min
- 00000094  0F 8C 00000085		jl		rangeError
- 0000009A  0F 84 00000093		je		single			; if only 1 term
- 000000A0  83 F8 02			cmp		eax, 2
- 000000A3  0F 84 0000009B		je		double			; if only 2 terms
-
-					; print first two terms of fib
- 000000A9  A1 0000014B R		mov		eax, term_1
- 000000AE  E8 00000000 E		call	WriteDec
- 000000B3  BA 00000157 R		mov		edx, OFFSET fiveSpaces
- 000000B8  E8 00000000 E		call	WriteString
- 000000BD  A1 0000014F R		mov		eax, term_2
- 000000C2  E8 00000000 E		call	WriteDec
- 000000C7  BA 00000157 R		mov		edx, OFFSET fiveSpaces
- 000000CC  E8 00000000 E		call	WriteString
-
-					; initialize loop variables
- 000000D1  A1 0000014B R		mov		eax, term_1
- 000000D6  8B 1D 0000014F R		mov		ebx, term_2
- 000000DC  8B 0D 00000153 R		mov		ecx, totalTerms
- 000000E2  83 E9 02			sub		ecx, 2				; accounts for two terms already handled
-
-				; incremented loop for fib sequence
- 000000E5			fibLoop:
- 000000E5  FE 05 0000015D R		inc		termsPerLine
- 000000EB  03 C3			add		eax, ebx		; add first and second terms
- 000000ED  E8 00000000 E		call	WriteDec
- 000000F2  BA 00000157 R		mov		edx, OFFSET	fiveSpaces
- 000000F7  E8 00000000 E		call	WriteString
-					
- 000000FC  93				xchg	eax, ebx			; swap so summed value(eax) becomes second term
- 000000FD  80 3D 0000015D R		cmp		termsPerLine, 4		; check that line has <=4 terms
-	   04
- 00000104  74 09			je		nextLine
-
- 00000106  E2 DD			loop	fibLoop
- 00000108  E8 00000000 E		call	CrLf
- 0000010D  EB 58			jmp		farewell
-
-				; make new line for fib printing
- 0000010F			nextLine:
- 0000010F  E8 00000000 E		call	CrLf
- 00000114  C6 05 0000015D R		mov		termsPerLine, 0		; reset to term count to 0 for new line
-	   00
- 0000011B  E2 C8			loop	fibLoop
- 0000011D  EB 48			jmp		farewell
-
-				; ---------------------------------------------
-				; Display range error
+				; TODO
 				; --------------------------------------------
- 0000011F			rangeError:
- 0000011F  BA 000000DE R		mov		edx, OFFSET outOfRange
- 00000124  E8 00000000 E		call	WriteString
- 00000129  E8 00000000 E		call	CrLf
- 0000012E  E9 FFFFFF3B			jmp		displayFibs
-
-				; ---------------------------------------------
-				; print one term fib sequence
+				; TODO
 				; --------------------------------------------
- 00000133			single:
- 00000133  A1 0000014B R		mov		eax, term_1
- 00000138  E8 00000000 E		call	WriteDec
- 0000013D  E8 00000000 E		call	CrLf
- 00000142  EB 23			jmp		farewell
+ 0000004B			getData:
+ 0000004B  BA 00000131 R		mov		edx, OFFSET inputPrompt
+ 00000050  E8 00000000 E		call	WriteString
+ 00000055  E8 00000000 E		call	CrLf
 
-				; ---------------------------------------------
-				; print two term fib sequence
+				; TODO
 				; --------------------------------------------
- 00000144			double:
- 00000144  A1 0000014B R		mov		eax, term_1
- 00000149  E8 00000000 E		call	WriteDec
- 0000014E  BA 00000157 R		mov		edx, OFFSET fiveSpaces
- 00000153  E8 00000000 E		call	WriteString
- 00000158  A1 0000014F R		mov		eax, term_2
- 0000015D  E8 00000000 E		call	WriteDec
- 00000162  E8 00000000 E		call	CrLf
+				; TODO
+				; --------------------------------------------
+ 0000005A			validate:
 
-				; ---------------------------------------------
-				; Give goodbye message to user and exit
-				;	program
-				; ---------------------------------------------
- 00000167			farewell:
- 00000167  BA 00000108 R		mov		edx, OFFSET partingPrompt
- 0000016C  E8 00000000 E		call	WriteString
- 00000171  E8 00000000 E		call	CrLf
- 00000176  BA 00000125 R		mov		edx, OFFSET	goodbye
- 0000017B  E8 00000000 E		call	WriteString
- 00000180  BA 0000012F R		mov		edx, OFFSET	userName
- 00000185  E8 00000000 E		call	WriteString
- 0000018A  E8 00000000 E		call	CrLf
+				; --------------------------------------------
+				; Display error message for failed validation
+				; --------------------------------------------
+ 0000005A			displayErrorMsg:
+ 0000005A  BA 00000184 R		mov		edx, OFFSET invalidMsg
+ 0000005F  E8 00000000 E		call	WriteString
+ 00000064  E8 00000000 E		call	CrLf
+				;	jmp		getData
+
+				; TODO
+				; --------------------------------------------
+				; Display composites based on user-given range
+				; --------------------------------------------
+ 00000069			showComposites:
+
+				; TODO
+				; --------------------------------------------
+				; Display only odd composite values
+				; --------------------------------------------
+ 00000069			oddOnly:
+
+				; TODO
+				; --------------------------------------------
+				; Verify whether next number is composite
+				; --------------------------------------------
+ 00000069			isComposite:
+
+				; --------------------------------------------
+				; Display closing message and exit program
+				; --------------------------------------------
+ 00000069			goodbye:
+ 00000069  BA 00000167 R		mov		edx, OFFSET thanksMsg
+ 0000006E  E8 00000000 E		call	WriteString
 
 					exit	; exit to operating system
- 0000018F  6A 00	   *	    push   +000000000h
- 00000191  E8 00000000 E   *	    call   ExitProcess
- 00000196			main ENDP
+ 00000073  6A 00	   *	    push   +000000000h
+ 00000075  E8 00000000 E   *	    call   ExitProcess
+ 0000007A			main ENDP
+
+				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 22:09:12
-!Fibonacci Numbers  (program2.asm			     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 17:57:35
+/Composite Number Spreadsheet     (program3.asm		     Symbols 2 - 1
 
 
 
@@ -361,8 +307,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000015E Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000196 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000001A4 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000007A Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -469,17 +415,15 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000196 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000007A Public STDCALL
   introduction . . . . . . . . .	L Near	 00000000 _TEXT	
-  getUserInfo  . . . . . . . . .	L Near	 0000001E _TEXT	
-  displayInstructions  . . . . .	L Near	 00000050 _TEXT	
-  displayFibs  . . . . . . . . .	L Near	 0000006E _TEXT	
-  fibLoop  . . . . . . . . . . .	L Near	 000000E5 _TEXT	
-  nextLine . . . . . . . . . . .	L Near	 0000010F _TEXT	
-  rangeError . . . . . . . . . .	L Near	 0000011F _TEXT	
-  single . . . . . . . . . . . .	L Near	 00000133 _TEXT	
-  double . . . . . . . . . . . .	L Near	 00000144 _TEXT	
-  farewell . . . . . . . . . . .	L Near	 00000167 _TEXT	
+  getData  . . . . . . . . . . .	L Near	 0000004B _TEXT	
+  validate . . . . . . . . . . .	L Near	 0000005A _TEXT	
+  displayErrorMsg  . . . . . . .	L Near	 0000005A _TEXT	
+  showComposites . . . . . . . .	L Near	 00000069 _TEXT	
+  oddOnly  . . . . . . . . . . .	L Near	 00000069 _TEXT	
+  isComposite  . . . . . . . . .	L Near	 00000069 _TEXT	
+  goodbye  . . . . . . . . . . .	L Near	 00000069 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -571,6 +515,7 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
+MAX  . . . . . . . . . . . . . .	Number	 0000012Ch   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
 MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
@@ -596,6 +541,7 @@ MB_USERICON  . . . . . . . . . .	Number	 00000080h
 MB_YESNOCANCEL . . . . . . . . .	Number	 00000003h   
 MB_YESNO . . . . . . . . . . . .	Number	 00000004h   
 MENU_EVENT . . . . . . . . . . .	Number	 00000008h   
+MIN  . . . . . . . . . . . . . .	Number	 00000001h   
 MOUSE_EVENT  . . . . . . . . . .	Number	 00000002h   
 MessageBox . . . . . . . . . . .	Text   	 MessageBoxA
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
@@ -698,19 +644,19 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
-author . . . . . . . . . . . . .	Byte	 00000012 _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
+description0 . . . . . . . . . .	Byte	 0000008E _DATA	
+description1 . . . . . . . . . .	Byte	 000000D1 _DATA	
+directions . . . . . . . . . . .	Byte	 00000104 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-fiveSpaces . . . . . . . . . . .	Byte	 00000157 _DATA	
-goodbye  . . . . . . . . . . . .	Byte	 00000125 _DATA	
+extraCreditMsg . . . . . . . . .	Byte	 0000004A _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-greeting . . . . . . . . . . . .	Byte	 00000044 _DATA	
-instructions_0 . . . . . . . . .	Byte	 00000049 _DATA	
-instructions_1 . . . . . . . . .	Byte	 0000007E _DATA	
+inputPrompt  . . . . . . . . . .	Byte	 00000131 _DATA	
+invalidMsg . . . . . . . . . . .	Byte	 00000184 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -718,19 +664,10 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-max  . . . . . . . . . . . . . .	DWord	 00000143 _DATA	
-min  . . . . . . . . . . . . . .	DWord	 00000147 _DATA	
-namePrompt . . . . . . . . . . .	Byte	 00000030 _DATA	
-outOfRange . . . . . . . . . . .	Byte	 000000DE _DATA	
-partingPrompt  . . . . . . . . .	Byte	 00000108 _DATA	
-programTitle . . . . . . . . . .	Byte	 00000000 _DATA	
+programTitle . . . . . . . . . .	Byte	 0000002C _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-term_1 . . . . . . . . . . . . .	DWord	 0000014B _DATA	
-term_2 . . . . . . . . . . . . .	DWord	 0000014F _DATA	
-termsPerLine . . . . . . . . . .	Byte	 0000015D _DATA	
-termsPrompt  . . . . . . . . . .	Byte	 000000B7 _DATA	
-totalTerms . . . . . . . . . . .	DWord	 00000153 _DATA	
-userName . . . . . . . . . . . .	Byte	 0000012F _DATA	
+thanksMsg  . . . . . . . . . . .	Byte	 00000167 _DATA	
+welcomeMsg . . . . . . . . . . .	Byte	 00000000 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
