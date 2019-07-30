@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:16:12
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 22:09:12
 !Fibonacci Numbers  (program2.asm			     Page 1 - 1
 
 
@@ -201,8 +201,8 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:16:12
  000000F7  E8 00000000 E		call	WriteString
 					
  000000FC  93				xchg	eax, ebx			; swap so summed value(eax) becomes second term
- 000000FD  80 3D 0000015D R		cmp		termsPerLine, 5		; check that line has <=5 terms
-	   05
+ 000000FD  80 3D 0000015D R		cmp		termsPerLine, 4		; check that line has <=4 terms
+	   04
  00000104  74 09			je		nextLine
 
  00000106  E2 DD			loop	fibLoop
@@ -267,7 +267,7 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:16:12
  00000196			main ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 10:16:12
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/14/19 22:09:12
 !Fibonacci Numbers  (program2.asm			     Symbols 2 - 1
 
 

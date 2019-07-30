@@ -124,7 +124,7 @@ fibLoop:
 	call	WriteString
 	
 	xchg	eax, ebx			; swap so summed value(eax) becomes second term
-	cmp		termsPerLine, 5		; check that line has <=5 terms
+	cmp		termsPerLine, 4		; check that line has <=4 terms
 	je		nextLine
 
 	loop	fibLoop
