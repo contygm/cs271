@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 17:57:35
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 20:39:18
 /Composite Number Spreadsheet     (program3.asm		     Page 1 - 1
 
 
@@ -31,14 +31,15 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 17:57:35
 			      C 
 
 				; --------------------------------------------
-				; constant definitions for minimum and maximum
+				; constant definitions
 				; --------------------------------------------
  = 0000012C			MAX	= 300
  = 00000001			MIN	= 1
+ = 00000009			MAX_PER_LINE = 9
 
  00000000			.data
 
-				; intro and exit prompts
+				; prompts
  00000000 57 65 6C 63 6F	welcomeMsg		BYTE	"Welcome to the Composite Number Spreadsheet",0
 	   6D 65 20 74 6F
 	   20 74 68 65 20
@@ -93,16 +94,24 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 17:57:35
 	   6B 65 20 74 6F
 	   20 73 65 65 2E
 	   00
- 00000104 49 92 6C 6C 20	directions		BYTE	"I’ll accept orders for up to 300 composites.",0
-	   61 63 63 65 70
-	   74 20 6F 72 64
-	   65 72 73 20 66
-	   6F 72 20 75 70
-	   20 74 6F 20 33
-	   30 30 20 63 6F
-	   6D 70 6F 73 69
-	   74 65 73 2E 00
- 00000131 48 6F 77 20 6D	inputPrompt		BYTE	"How many composites do you want to view? [1 .. 300]: ",0
+ 00000104 49 20 77 69 6C	directions		BYTE	"I will accept orders for up to 300 composites.",0
+	   6C 20 61 63 63
+	   65 70 74 20 6F
+	   72 64 65 72 73
+	   20 66 6F 72 20
+	   75 70 20 74 6F
+	   20 33 30 30 20
+	   63 6F 6D 70 6F
+	   73 69 74 65 73
+	   2E 00
+
+ 00000133 54 68 61 6E 6B	thanksMsg		BYTE	"Thanks for using my program!",0
+	   73 20 66 6F 72
+	   20 75 73 69 6E
+	   67 20 6D 79 20
+	   70 72 6F 67 72
+	   61 6D 21 00
+ 00000150 48 6F 77 20 6D	inputPrompt		BYTE	"How many composites do you want to view? [1 .. 300]: ",0
 	   61 6E 79 20 63
 	   6F 6D 70 6F 73
 	   69 74 65 73 20
@@ -113,107 +122,168 @@ Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 17:57:35
 	   20 5B 31 20 2E
 	   2E 20 33 30 30
 	   5D 3A 20 00
- 00000167 54 68 61 6E 6B	thanksMsg		BYTE	"Thanks for using my program!",0
-	   73 20 66 6F 72
-	   20 75 73 69 6E
-	   67 20 6D 79 20
-	   70 72 6F 67 72
-	   61 6D 21 00
-
-				; validation error 
- 00000184 4F 75 74 20 6F	invalidMsg		BYTE	"Out of range. Please try again.",0
+ 00000186 4F 75 74 20 6F	invalidMsg		BYTE	"Out of range. Please try again.",0
 	   66 20 72 61 6E
 	   67 65 2E 20 50
 	   6C 65 61 73 65
 	   20 74 72 79 20
 	   61 67 61 69 6E
 	   2E 00
+ 000001A6 20 20 20 00		spaces			BYTE	"   ",0
+
+				; variables
+ 000001AA 00000000		range			DWORD	?
+ 000001AE 00000000		lineIndex		DWORD	0
+ 000001B2 00000001		currentNum		DWORD	1
+ 000001B6 00000000		isComp			DWORD	0
 
  00000000			.code
+
  00000000			main PROC
+ 00000000  E8 00000016			call introduction
+ 00000005  E8 0000005D			call getData
+ 0000000A  E8 0000009B			call showComposites
+ 0000000F  E8 0000010D			call goodbye
+					exit	; exit to operating system
+ 00000014  6A 00	   *	    push   +000000000h
+ 00000016  E8 00000000 E   *	    call   ExitProcess
+ 0000001B			main ENDP
 
 				; --------------------------------------------
 				; Display instructions and greeting
 				; --------------------------------------------
- 00000000			introduction:
- 00000000  BA 00000000 R		mov		edx, OFFSET welcomeMsg
- 00000005  E8 00000000 E		call	WriteString
- 0000000A  E8 00000000 E		call	CrLf
+ 0000001B			introduction PROC
+ 0000001B  BA 00000000 R		mov		edx, OFFSET welcomeMsg
+ 00000020  E8 00000000 E		call	WriteString
+ 00000025  E8 00000000 E		call	CrLf
 
- 0000000F  BA 0000002C R		mov		edx, OFFSET programTitle
- 00000014  E8 00000000 E		call	WriteString
- 00000019  E8 00000000 E		call	CrLf
+ 0000002A  BA 0000002C R		mov		edx, OFFSET programTitle
+ 0000002F  E8 00000000 E		call	WriteString
+ 00000034  E8 00000000 E		call	CrLf
 
- 0000001E  BA 0000008E R		mov		edx, OFFSET description0
- 00000023  E8 00000000 E		call	WriteString
- 00000028  E8 00000000 E		call	CrLf
+ 00000039  BA 0000008E R		mov		edx, OFFSET description0
+ 0000003E  E8 00000000 E		call	WriteString
+ 00000043  E8 00000000 E		call	CrLf
 
- 0000002D  BA 000000D1 R		mov		edx, OFFSET description1
- 00000032  E8 00000000 E		call	WriteString
- 00000037  E8 00000000 E		call	CrLf
+ 00000048  BA 000000D1 R		mov		edx, OFFSET description1
+ 0000004D  E8 00000000 E		call	WriteString
+ 00000052  E8 00000000 E		call	CrLf
 
- 0000003C  BA 00000104 R		mov		edx, OFFSET directions
- 00000041  E8 00000000 E		call	WriteString
- 00000046  E8 00000000 E		call	CrLf
+ 00000057  BA 00000104 R		mov		edx, OFFSET directions
+ 0000005C  E8 00000000 E		call	WriteString
+ 00000061  E8 00000000 E		call	CrLf
+					
+ 00000066  C3				ret
+ 00000067			introduction ENDP
 
-				; TODO
 				; --------------------------------------------
-				; TODO
+				; Prompt user for range of composite numbers
+				; and store that number in a variable
 				; --------------------------------------------
- 0000004B			getData:
- 0000004B  BA 00000131 R		mov		edx, OFFSET inputPrompt
- 00000050  E8 00000000 E		call	WriteString
- 00000055  E8 00000000 E		call	CrLf
+ 00000067			getData		PROC
+ 00000067  BA 00000150 R		mov		edx, OFFSET inputPrompt
+ 0000006C  E8 00000000 E		call	WriteString
+ 00000071  E8 00000000 E		call	ReadInt
+ 00000076  A3 000001AA R		mov		range, eax
+ 0000007B  E8 00000001			call	validate		; validate that range is between min/max
+ 00000080  C3				ret
+ 00000081			getData		ENDP
 
-				; TODO
 				; --------------------------------------------
-				; TODO
+				; Validate user input against min/max
 				; --------------------------------------------
- 0000005A			validate:
+ 00000081			validate	PROC
+ 00000081  81 3D 000001AA R		cmp		range, MAX		; if input > max
+	   0000012C
+ 0000008B  7F 0B			jg		displayErrorMsg		
+ 0000008D  83 3D 000001AA R		cmp		range, MIN		; if input < min
+	   01
+ 00000094  7C 02			jl		displayErrorMsg
+ 00000096  EB 11			jmp		valid
 
 				; --------------------------------------------
 				; Display error message for failed validation
 				; --------------------------------------------
- 0000005A			displayErrorMsg:
- 0000005A  BA 00000184 R		mov		edx, OFFSET invalidMsg
- 0000005F  E8 00000000 E		call	WriteString
- 00000064  E8 00000000 E		call	CrLf
-				;	jmp		getData
+ 00000098			displayErrorMsg:
+ 00000098  BA 00000186 R		mov		edx, OFFSET invalidMsg
+ 0000009D  E8 00000000 E		call	WriteString
+ 000000A2  E8 00000000 E		call	CrLf
+ 000000A7  EB BE			jmp		getData
 
+ 000000A9			valid:
+ 000000A9  C3				ret
+
+ 000000AA			validate	ENDP
 				; TODO
 				; --------------------------------------------
 				; Display composites based on user-given range
 				; --------------------------------------------
- 00000069			showComposites:
+ 000000AA			showComposites	PROC
+ 000000AA  8B 0D 000001AA R		mov		ecx, range			; initialize loop counter
+ 000000B0  A1 000001B2 R		mov		eax, currentNum
+ 000000B5  E8 00000000 E		call	CrLf
 
-				; TODO
+ 000000BA			displayNums:
+ 000000BA  E8 00000057			call	isComposite
+ 000000BF  83 3D 000001B6 R		cmp		isComp, 1
+	   01
+ 000000C6  74 0A			je		print
+ 000000C8  FF 05 000001B2 R		inc		currentNum
+ 000000CE  E2 EA			loop	displayNums
+ 000000D0  EB 3E			jmp		stop	
+
+				; TODO ** add choice variable
 				; --------------------------------------------
-				; Display only odd composite values
+				; Display only odd composite valuess
 				; --------------------------------------------
- 00000069			oddOnly:
+				;oddOnly: 
+
+ 000000D2			print:	
+ 000000D2  A1 000001B2 R		mov		eax, currentNum
+ 000000D7  E8 00000000 E		call	WriteDec
+ 000000DC  BA 000001A6 R		mov		edx, OFFSET spaces
+ 000000E1  E8 00000000 E		call	WriteString
+ 000000E6  FF 05 000001B2 R		inc		currentNum
+ 000000EC  FF 05 000001AE R		inc		lineIndex
+ 000000F2  83 3D 000001AE R		cmp		lineIndex, MAX_PER_LINE
+	   09
+ 000000F9  7F 04			jg		newLine
+ 000000FB  E2 BD			loop	displayNums
+ 000000FD  EB 11			jmp		stop
+
+ 000000FF			newLine:
+ 000000FF  E8 00000000 E		call	CrLf
+ 00000104  C7 05 000001AE R		mov		lineIndex, 0
+	   00000000
+ 0000010E  E2 AA			loop	displayNums
+
+ 00000110			stop:
+ 00000110  E8 00000000 E		call	CrLf
+ 00000115  C3				ret
+
+ 00000116			showComposites	ENDP
 
 				; TODO
 				; --------------------------------------------
 				; Verify whether next number is composite
 				; --------------------------------------------
- 00000069			isComposite:
+ 00000116			isComposite		PROC
+ 00000116  C7 05 000001B6 R		mov		isComp, 1
+	   00000001
+ 00000120  C3				ret
+ 00000121			isComposite		ENDP
 
 				; --------------------------------------------
 				; Display closing message and exit program
 				; --------------------------------------------
- 00000069			goodbye:
- 00000069  BA 00000167 R		mov		edx, OFFSET thanksMsg
- 0000006E  E8 00000000 E		call	WriteString
-
-					exit	; exit to operating system
- 00000073  6A 00	   *	    push   +000000000h
- 00000075  E8 00000000 E   *	    call   ExitProcess
- 0000007A			main ENDP
-
-				; (insert additional procedures here)
+ 00000121			goodbye		PROC
+ 00000121  BA 00000133 R		mov		edx, OFFSET thanksMsg
+ 00000126  E8 00000000 E		call	WriteString
+ 0000012B  C3				ret
+ 0000012C			goodbye		ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 17:57:35
+Microsoft (R) Macro Assembler Version 14.21.27702.2	    07/29/19 20:39:18
 /Composite Number Spreadsheet     (program3.asm		     Symbols 2 - 1
 
 
@@ -307,8 +377,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000001A4 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000007A Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000001BA Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000012C Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -415,17 +485,21 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000007A Public STDCALL
-  introduction . . . . . . . . .	L Near	 00000000 _TEXT	
-  getData  . . . . . . . . . . .	L Near	 0000004B _TEXT	
-  validate . . . . . . . . . . .	L Near	 0000005A _TEXT	
-  displayErrorMsg  . . . . . . .	L Near	 0000005A _TEXT	
-  showComposites . . . . . . . .	L Near	 00000069 _TEXT	
-  oddOnly  . . . . . . . . . . .	L Near	 00000069 _TEXT	
-  isComposite  . . . . . . . . .	L Near	 00000069 _TEXT	
-  goodbye  . . . . . . . . . . .	L Near	 00000069 _TEXT	
+getData  . . . . . . . . . . . .	P Near	 00000067 _TEXT	Length= 0000001A Public STDCALL
+goodbye  . . . . . . . . . . . .	P Near	 00000121 _TEXT	Length= 0000000B Public STDCALL
+introduction . . . . . . . . . .	P Near	 0000001B _TEXT	Length= 0000004C Public STDCALL
+isComposite  . . . . . . . . . .	P Near	 00000116 _TEXT	Length= 0000000B Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001B Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+showComposites . . . . . . . . .	P Near	 000000AA _TEXT	Length= 0000006C Public STDCALL
+  displayNums  . . . . . . . . .	L Near	 000000BA _TEXT	
+  print  . . . . . . . . . . . .	L Near	 000000D2 _TEXT	
+  newLine  . . . . . . . . . . .	L Near	 000000FF _TEXT	
+  stop . . . . . . . . . . . . .	L Near	 00000110 _TEXT	
+validate . . . . . . . . . . . .	P Near	 00000081 _TEXT	Length= 00000029 Public STDCALL
+  displayErrorMsg  . . . . . . .	L Near	 00000098 _TEXT	
+  valid  . . . . . . . . . . . .	L Near	 000000A9 _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -515,6 +589,7 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
+MAX_PER_LINE . . . . . . . . . .	Number	 00000009h   
 MAX  . . . . . . . . . . . . . .	Number	 0000012Ch   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
@@ -647,6 +722,7 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
+currentNum . . . . . . . . . . .	DWord	 000001B2 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 description0 . . . . . . . . . .	Byte	 0000008E _DATA	
 description1 . . . . . . . . . .	Byte	 000000D1 _DATA	
@@ -655,18 +731,22 @@ exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 extraCreditMsg . . . . . . . . .	Byte	 0000004A _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-inputPrompt  . . . . . . . . . .	Byte	 00000131 _DATA	
-invalidMsg . . . . . . . . . . .	Byte	 00000184 _DATA	
+inputPrompt  . . . . . . . . . .	Byte	 00000150 _DATA	
+invalidMsg . . . . . . . . . . .	Byte	 00000186 _DATA	
+isComp . . . . . . . . . . . . .	DWord	 000001B6 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
 lightGreen . . . . . . . . . . .	Number	 0000000Ah   
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
+lineIndex  . . . . . . . . . . .	DWord	 000001AE _DATA	
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 programTitle . . . . . . . . . .	Byte	 0000002C _DATA	
+range  . . . . . . . . . . . . .	DWord	 000001AA _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-thanksMsg  . . . . . . . . . . .	Byte	 00000167 _DATA	
+spaces . . . . . . . . . . . . .	Byte	 000001A6 _DATA	
+thanksMsg  . . . . . . . . . . .	Byte	 00000133 _DATA	
 welcomeMsg . . . . . . . . . . .	Byte	 00000000 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
