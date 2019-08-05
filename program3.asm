@@ -21,7 +21,6 @@ MAX_PER_LINE = 9
 ; prompts
 welcomeMsg		BYTE	"Welcome to the Composite Number Spreadsheet",0
 programTitle	BYTE	"Programmed by Genevieve Conty",0
-extraCreditMsg	BYTE	"**EC: Program allows user to choose to display only odd composites.",0
 description0	BYTE	"This program is capable of generating a list of composite numbers.",0
 description1	BYTE	"Simply let me know how many you would like to see.",0
 directions		BYTE	"I will accept orders for up to 300 composites.",0
@@ -96,17 +95,17 @@ validate	PROC
 	jl		displayErrorMsg
 	jmp		valid
 
-; --------------------------------------------
-; Display error message for failed validation
-; --------------------------------------------
-displayErrorMsg:
-	mov		edx, OFFSET invalidMsg
-	call	WriteString
-	call	CrLf
-	jmp		getData
+	; --------------------------------------------
+	; Display error message for failed validation
+	; --------------------------------------------
+	displayErrorMsg:
+		mov		edx, OFFSET invalidMsg
+		call	WriteString
+		call	CrLf
+		jmp		getData
 
-valid:
-	ret
+	valid:
+		ret
 
 validate	ENDP
 
@@ -115,53 +114,92 @@ validate	ENDP
 ; --------------------------------------------
 showComposites	PROC
 	mov		ecx, range			; initialize loop counter
-	mov		eax, currentNum
-	call	CrLf
 
-displayNums:
-	call	isComposite
-	cmp		isComp, 1
-	je		print
-	inc		currentNum
-	loop	displayNums
-	jmp		stop	
+	displayNums:
+		call	isComposite	
+		; print composite number
+		mov		eax, currentNum	
+		call	WriteDec
+		mov		edx, OFFSET spaces
+		call	WriteString
+		inc		currentNum
+		inc		lineIndex		
+		cmp		lineIndex, MAX_PER_LINE		; check that only 10 numbers per line
+		jg		newLine						; new line if needed
+		loop	displayNums
+		jmp		stop
 
-; TODO ** add choice variable
-; --------------------------------------------
-; Display only odd composite valuess
-; --------------------------------------------
-;oddOnly: 
+	newLine:
+		call	CrLf
+		mov		lineIndex, 0
+		loop	displayNums
 
-print:	
-	mov		eax, currentNum
-	call	WriteDec
-	mov		edx, OFFSET spaces
-	call	WriteString
-	inc		currentNum
-	inc		lineIndex
-	cmp		lineIndex, MAX_PER_LINE
-	jg		newLine
-	loop	displayNums
-	jmp		stop
-
-newLine:
-	call	CrLf
-	mov		lineIndex, 0
-	loop	displayNums
-
-stop:
-	call	CrLf
-	ret
+	stop:
+		call	CrLf
+		ret
 
 showComposites	ENDP
 
-; TODO
 ; --------------------------------------------
-; Verify whether next number is composite
+; Verify whether next number is composite, keeps
+; incrementing number until next composite is 
+; reached
 ; --------------------------------------------
 isComposite		PROC
-	mov		isComp, 1
-	ret
+
+	mov		eax, currentNum
+	
+	; check number isn't prime and can be divided by
+	; 2, 3, 5, 7
+	divLoop: 
+		; check that number isn't base prime numbers 
+		cmp		eax, 2
+		je		notComp
+		cmp		eax, 3
+		je		notComp
+		cmp		eax, 5
+		je		notComp
+		cmp		eax, 7
+		je		notComp
+
+		; check if numbers are divisible by base prime numbers
+		mov		edx, 0		
+		mov		ebx, 2
+		div		ebx
+		cmp		edx, 0	; if no remainder, it's composite
+		je		stop
+
+		mov		eax, currentNum
+		mov		edx, 0		
+		mov		ebx, 3
+		div		ebx
+		cmp		edx, 0
+		je		stop
+
+		mov		eax, currentNum
+		mov		edx, 0		
+		mov		ebx, 5
+		div		ebx
+		cmp		edx, 0
+		je		stop
+
+		mov		eax, currentNum
+		mov		edx, 0		
+		mov		ebx, 7
+		div		ebx
+		cmp		edx, 0
+		je		stop
+		jmp		notComp	
+
+	; increment to next number
+	notComp:
+		inc		currentNum
+		mov		eax, currentNum
+		mov		edx, 0
+		jmp		divLoop
+
+	stop:
+		ret
 isComposite		ENDP
 
 ; --------------------------------------------
@@ -170,6 +208,7 @@ isComposite		ENDP
 goodbye		PROC
 	mov		edx, OFFSET thanksMsg
 	call	WriteString
+	call	CrLf
 	ret
 goodbye		ENDP
 
