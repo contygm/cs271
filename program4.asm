@@ -46,8 +46,6 @@ numsToGenerate  DWORD   ?               ; user input, how many numbers to be gen
 spaces          BYTE    "     ",0       ; 5 spaces
 lineIndex		DWORD	0
 
-endLoopMsg		BYTE	"end of genRandomInts",0
-
 .code
 main PROC
     
@@ -70,20 +68,21 @@ main PROC
 	push    numsToGenerate
     call    displayList                 ; STACK: @ret, @unsortedPrompt, @numArr, numsTroGenerate
 
-    ; calculate and display median
+	; sort array
+    push    OFFSET numArr   
+    push    numsToGenerate
+    call    sortArray                   ; STACK: @ret, @numArr, numsTroGenerate
+    
+	; calculate and display median
     push    numsToGenerate
     push    OFFSET numArr
     push    OFFSET medianPrompt
     call    displayMedian               ; STACK: @ret, @medianPrompt, @numArr, numsTroGenerate
-
-;    push    numsToGenerate
-;    push    OFFSET numArr   
-;    call    sortArray                   ; STACK: @ret, @numArr, numsTroGenerate
     
     ; display sorted numbers
-    push    numsToGenerate
-    push    OFFSET numArr
-    push    OFFSET sortedPrompt        ; STACK: @ret, @sortedPrompt, @numArr, numsTroGenerate
+    push    OFFSET sortedPrompt
+	push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
+	push    numsToGenerate        ; STACK: @ret, @sortedPrompt, @numArr, numsTroGenerate
     call    displayList
 
 	exit	; exit to operating system
@@ -204,48 +203,42 @@ fillArray ENDP
 ; returns: TODO
 ; preconditions: TODO
 ; registers changed: TODO
-;
-;for (k=0; k<request-1; k++) {
-;   i = k;
-;   for (j=k+1; j<request; j++) {
-;      if (array[j] > array[i])
-;         i = j;
-;   }
-;   exchange(array[k], array[i]);
-;}
-;
 sortArray PROC      ; TODO
 
-;    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
-;    mov     ebp, esp
-;    mov     ecx, [ebp+12]       ; put numsToGenerate into ECX
-;    dec     ecx                 ; adjust for index
-;    mov     edi, [ebp+8] 
+    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
+    mov     ebp, esp
+    mov     ecx, [ebp+8]       ; put numsToGenerate into ECX
+    dec     ecx                ; adjust for index 
+	mov     esi, [ebp+12]
 
     ; --------------------------------------------
     ; TODO: for (k=0; k<request-1; k++) i = k;
     ; --------------------------------------------
- ;   outerLoop: 
-        
- ;       push    ecx             ; STACK: k (ecx), ebp, @ret, @numArr, numsTroGenerate
- ;       mov     esi, [ebp+12]
+    outerLoop: 
+        push    ecx             ; save outer loop count
+		mov     esi, [ebp+12]
 
-        ; exchange(array[k], array[i]
-    
-    ; --------------------------------------------
-    ; TODO: desc
-    ; --------------------------------------------
- ;   swapElements: 
-;        loop    outerLoop
-
-    ; --------------------------------------------
+	; --------------------------------------------
     ; TODO: for (j=k+1; j<request; j++)
     ; --------------------------------------------
- ;   innerLoop: 
+    innerLoop: 
         ; if (array[j] > array[i]) i = j;
- ;       mov		eax, [esi]
+        mov		ebx, [esi+4]	; array[j] -> j=k+1
+		mov		eax, [esi]		; array[i]
+		cmp		ebx, eax		; array[j] > array[i]
+		jle		lessThan
+		mov		[esi+4], eax	; swap
+		mov		[esi], ebx
 
-    
+	lessThan:
+		add		esi, 4			; j++
+		loop	innerLoop
+ 
+		pop		ecx
+		loop	outerLoop
+
+    pop		ebp
+	ret		8
 
 sortArray ENDP
 
