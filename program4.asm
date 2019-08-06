@@ -73,9 +73,9 @@ main PROC
     push    OFFSET medianPrompt
     call    displayMedian               ; STACK: @ret, @medianPrompt, @numArr, numsTroGenerate
 
-    push    numsToGenerate
-    push    OFFSET numArr   
-    call    sortArray                   ; STACK: @ret, @numArr, numsTroGenerate
+;    push    numsToGenerate
+;    push    OFFSET numArr   
+;    call    sortArray                   ; STACK: @ret, @numArr, numsTroGenerate
     
     ; display sorted numbers
     push    numsToGenerate
@@ -127,7 +127,7 @@ getData PROC
     ; Get input from user. Check that user input 
     ; is between MAX and MIN. 
     ; --------------------------------------------
-    inputLopp:
+    inputLoop:
         mov		edx, OFFSET inputPrompt
         call	WriteString
         call	ReadInt
@@ -212,34 +212,34 @@ fillArray ENDP
 ;
 sortArray PROC      ; TODO
 
-    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
-    mov     ebp, esp
-    mov     ecx, [ebp+12]       ; put numsToGenerate into ECX
-    dec     ecx                 ; adjust for index
-    mov     edi, [ebp+8] 
+;    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
+;    mov     ebp, esp
+;    mov     ecx, [ebp+12]       ; put numsToGenerate into ECX
+;    dec     ecx                 ; adjust for index
+;    mov     edi, [ebp+8] 
 
     ; --------------------------------------------
     ; TODO: for (k=0; k<request-1; k++) i = k;
     ; --------------------------------------------
-    outerLoop: 
+ ;   outerLoop: 
         
-        push    ecx             ; STACK: k (ecx), ebp, @ret, @numArr, numsTroGenerate
-        mov     esi, [ebp+12]
+ ;       push    ecx             ; STACK: k (ecx), ebp, @ret, @numArr, numsTroGenerate
+ ;       mov     esi, [ebp+12]
 
         ; exchange(array[k], array[i]
     
     ; --------------------------------------------
     ; TODO: desc
     ; --------------------------------------------
-    swapElements: 
-        loop    outerLoop
+ ;   swapElements: 
+;        loop    outerLoop
 
     ; --------------------------------------------
     ; TODO: for (j=k+1; j<request; j++)
     ; --------------------------------------------
-    innerLoop: 
+ ;   innerLoop: 
         ; if (array[j] > array[i]) i = j;
-        mov		eax, [esi]
+ ;       mov		eax, [esi]
 
     
 
@@ -262,7 +262,8 @@ displayMedian PROC
 
     ; median = (n + 1) / 2
     mov     eax, 1
-    div     2
+	mov		ebx, 2
+    div     ebx
     cmp     edx, 0
     je      oddMedian
 
@@ -271,7 +272,8 @@ displayMedian PROC
     ; --------------------------------------------
     evenMedian:
     ; get first number
-    mul     4           ; multiply eax by 4 
+	mov		ebx, 4
+    mul     ebx         ; multiply eax by 4 
     add     esi, eax
     mov     edx, [esi]  ; put 1st num in edx
 
@@ -282,7 +284,8 @@ displayMedian PROC
     ; find average of two numbers
     add     eax, edx    ; add both numbers together
     mov     edx, 0      ; reset edx
-    div     2           ; divide sum by 2
+	mov		ebx, 2
+    div     ebx         ; divide sum by 2
 
     jmp     printMedian
 
@@ -290,7 +293,8 @@ displayMedian PROC
     ; Retrieve odd median (middle of array)
     ; --------------------------------------------
     oddMedian:
-        mul     4           ; multiply eax by 4
+        mov		ebx, 4
+		mul     ebx           ; multiply eax by 4
         add     esi, eax
         mov     eax, [esi]
 
