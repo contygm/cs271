@@ -49,7 +49,7 @@ lineIndex		DWORD	0
 .code
 main PROC
     
-    call	RANDOMIZE                   ; need to call at the begining of the prog
+    call	RANDOMIZE                   
     call    introduction
  
     ; push ref to numsToGenerate onto stack (esp)
@@ -58,32 +58,34 @@ main PROC
 
     ; put fillArray params into stack
     
-    push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
+    push    OFFSET numArr              
 	push    numsToGenerate
-    call    fillArray                   ; fill with random numbers
+    call    fillArray                  
 
     ; display unsorted numbers
     push    OFFSET unsortedPrompt
-	push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
+	push    OFFSET numArr               
 	push    numsToGenerate
-    call    displayList                 ; STACK: @ret, @unsortedPrompt, @numArr, numsTroGenerate
+    call    displayList                 
 
 	; sort array
     push    OFFSET numArr   
     push    numsToGenerate
-    call    sortArray                   ; STACK: @ret, @numArr, numsTroGenerate
+    call    sortArray                  
     
 	; calculate and display median
     push    numsToGenerate
     push    OFFSET numArr
     push    OFFSET medianPrompt
-    call    displayMedian               ; STACK: @ret, @medianPrompt, @numArr, numsTroGenerate
+    call    displayMedian               
     
     ; display sorted numbers
     push    OFFSET sortedPrompt
-	push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
-	push    numsToGenerate        ; STACK: @ret, @sortedPrompt, @numArr, numsTroGenerate
+	push    OFFSET numArr                
+	push    numsToGenerate        
     call    displayList
+
+	call	goodbye
 
 	exit	; exit to operating system
 main ENDP
@@ -123,7 +125,6 @@ getData PROC
     push    ebp             
     mov     ebp, esp
     mov     ebx, [ebp+8]        ; put @numsToGenerate ref into EBX 
-    ; STACK: ebp, ret@, @numsToGen
 
     ; --------------------------------------------
     ; Get input from user. Check that user input 
@@ -133,8 +134,8 @@ getData PROC
         mov		edx, OFFSET inputPrompt
         call	WriteString
         call	ReadInt
-
-        ; validate that user input is between MIN/MAX
+        
+		; validate that user input is between MIN/MAX
         cmp		eax, MAX		    ; if input > MAX
         jg		displayErrorMsg		
         cmp		eax, MIN		    ; if input < MIN
@@ -148,15 +149,15 @@ getData PROC
         mov		edx, OFFSET invalidMsg
         call	WriteString
         call	CrLf
-        jmp		inputLoop       ; loop back to top of inputLoop
+        jmp		inputLoop  
 
     ; --------------------------------------------
     ; When input is valid, reset stack and return
     ; --------------------------------------------
     valid:
         mov		numsToGenerate, eax      ; put user input into numsToGen
-        pop     ebp             ; STACK: ret@, @numsToGen
-        ret     4               ; pop off @numsToGen
+		pop     ebp           
+		ret     4               
 
 getData ENDP
 
@@ -165,13 +166,12 @@ getData ENDP
 ;   numsToGenerate will equal.
 ; parameters (in stack order): @numArr, numsTroGenerate
 ; returns: numArr filled with the user's requested amount of random numbers
-; preconditions: TODO numsToGenerate != NULL, count = 0, numArr is empty, LO < HI
+; preconditions: numsToGenerate != NULL, count = 0, numArr is empty, LO < HI
 ; registers changed: ebp, edp, ecx, edi, eax
-fillArray PROC      ; TODO
+fillArray PROC    
 
-    ; STACK: @ret, @numArr, numsTroGenerate
     ; set up stack
-    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
+    push    ebp                 
     mov     ebp, esp
     mov     ecx, [ebp+8]        ; put numsToGenerate into ECX
     mov     edi, [ebp+12] 
@@ -192,41 +192,41 @@ fillArray PROC      ; TODO
         add     edi, 4          ; increment to next index
         loop    genRandomIntLoop
        
-        pop     ebp             ; STACK: @ret, @numArr, numsTroGenerate
-        ret     8               ; pop off numsTroGenerate, @numArr
-
+        pop     ebp             
+        ret     8              
 fillArray ENDP
 
 ; NAME: sortArray
-; description: TODO
-; parameters (in stack order): TODO
-; returns: TODO
-; preconditions: TODO
-; registers changed: TODO
-sortArray PROC      ; TODO
+; description: Order the array of randomly generated numbers using merge sort.
+; parameters (in stack order): numsToGenerate, @numArray
+; returns: sorted number array
+; preconditions: numArray != NULL
+; registers changed: ebp, sep, ecx, esi, eax, ebx
+sortArray PROC     
 
-    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
+    push    ebp                 
     mov     ebp, esp
     mov     ecx, [ebp+8]       ; put numsToGenerate into ECX
     dec     ecx                ; adjust for index 
 	mov     esi, [ebp+12]
 
     ; --------------------------------------------
-    ; TODO: for (k=0; k<request-1; k++) i = k;
+    ; Outer loop of merge sort:
+	;	for (k=0; k<request-1; k++) i = k;
     ; --------------------------------------------
     outerLoop: 
         push    ecx             ; save outer loop count
-		mov     esi, [ebp+12]
+		mov     esi, [ebp+12]	; reset register/array
 
 	; --------------------------------------------
-    ; TODO: for (j=k+1; j<request; j++)
+	; Outer loop of merge sort:
+    ;	for (j=k+1; j<request; j++)
     ; --------------------------------------------
     innerLoop: 
-        ; if (array[j] > array[i]) i = j;
         mov		ebx, [esi+4]	; array[j] -> j=k+1
 		mov		eax, [esi]		; array[i]
 		cmp		ebx, eax		; array[j] > array[i]
-		jle		lessThan
+		jle		lessThan		; if (array[j] > array[i]) i = j;
 		mov		[esi+4], eax	; swap
 		mov		[esi], ebx
 
@@ -234,7 +234,7 @@ sortArray PROC      ; TODO
 		add		esi, 4			; j++
 		loop	innerLoop
  
-		pop		ecx
+		pop		ecx				; reset counter for outerloop
 		loop	outerLoop
 
     pop		ebp
@@ -243,11 +243,11 @@ sortArray PROC      ; TODO
 sortArray ENDP
 
 ; NAME: displayMedian
-; description: TODO
+; description: Calculate and display the median of the numArray
 ; parameters (in stack order): @medianPrompt, @numArr, numsTroGenerate
-; returns: TODO
-; preconditions: TODO
-; registers changed: TODO
+; returns: median of numArray
+; preconditions: numArray != null, numArray is sorted
+; registers changed: ebp, eax, esi, edx, ebx, 
 displayMedian PROC 
 
     ; set up stack frame
@@ -258,11 +258,11 @@ displayMedian PROC
     mov     edx, 0
 
     ; median = (n + 1) / 2
-    mov     eax, 1
+    add     eax, 1
 	mov		ebx, 2
     div     ebx
-    cmp     edx, 0
-    je      oddMedian
+    cmp     edx, 1
+    jne     oddMedian
 
     ; --------------------------------------------
     ; Find median for even array lengths
@@ -311,11 +311,11 @@ displayMedian PROC
 displayMedian ENDP
 
 ; NAME: displayList
-; description: TODO
+; description: Display the contents of a number array
 ; parameters (in stack order): @prompt, @numArr, numsTroGenerate
-; returns: TODO
-; preconditions: TODO
-; registers changed: TODO
+; returns: displays contents of number array
+; preconditions: numArray != null
+; registers changed: ebp, ecx, esi, edx, ebx, eax
 displayList PROC        ; TODO
 
     push    ebp     ; STACK: ebp, @ret, @prompt, @numArr, numsTroGenerate
@@ -372,12 +372,13 @@ displayList PROC        ; TODO
 displayList ENDP
 
 ; NAME: goodbye
-; description: TODO
-; parameters (in stack order): TODO
-; returns: TODO
-; preconditions: TODO
-; registers changed: TODO
-goodbye		PROC        ; TODO
+; description: Display closing message. 
+; parameters (in stack order): none
+; returns: displays closing message
+; preconditions: none
+; registers changed: edx
+goodbye		PROC        
+	call	CrLf
 	mov		edx, OFFSET byeMsg
 	call	WriteString
 	ret
