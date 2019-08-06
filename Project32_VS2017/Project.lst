@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
+Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 21:03:47
 *Sorting Random Integers     (program4.asm		     Page 1 - 1
 
 
@@ -128,7 +128,7 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 	   70 75 74 00
 				
 				; goodbye prompt
- 0000017E 54 68 61 6E 6B	byeMsg       BYTE    "Thanks for using my program!",0
+ 0000017E 54 68 61 6E 6B	byeMsg			BYTE    "Thanks for using my program!",0
 	   73 20 66 6F 72
 	   20 75 73 69 6E
 	   67 20 6D 79 20
@@ -145,6 +145,12 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 	   00
  000004C9 00000000		lineIndex		DWORD	0
 				
+ 000004CD 65 6E 64 20 6F	endLoopMsg		BYTE	"end of genRandomInts",0
+	   66 20 67 65 6E
+	   52 61 6E 64 6F
+	   6D 49 6E 74 73
+	   00
+				
  00000000			.code
  00000000			main PROC
 				    
@@ -156,21 +162,22 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
  0000000F  E8 00000083		    call    getData
 				
 				    ; put fillArray params into stack
- 00000014  FF 35 000004BF R	    push    numsToGenerate
- 0000001A  68 0000019F R	    push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
- 0000001F  E8 000000AD		    call    fillArray                   ; fill with random numbers
+				    
+ 00000014  68 0000019F R	    push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
+ 00000019  FF 35 000004BF R		push    numsToGenerate
+ 0000001F  E8 000000B0		    call    fillArray                   ; fill with random numbers
 				
 				    ; display unsorted numbers
- 00000024  FF 35 000004BF R	    push    numsToGenerate
- 0000002A  68 0000019F R	    push    OFFSET numArr
- 0000002F  68 00000132 R	    push    OFFSET unsortedPrompt
- 00000034  E8 00000122		    call    displayList                 ; STACK: @ret, @unsortedPrompt, @numArr, numsTroGenerate
+ 00000024  68 00000132 R	    push    OFFSET unsortedPrompt
+ 00000029  68 0000019F R		push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
+ 0000002E  FF 35 000004BF R		push    numsToGenerate
+ 00000034  E8 00000125		    call    displayList                 ; STACK: @ret, @unsortedPrompt, @numArr, numsTroGenerate
 				
 				    ; calculate and display median
  00000039  FF 35 000004BF R	    push    numsToGenerate
  0000003F  68 0000019F R	    push    OFFSET numArr
  00000044  68 00000150 R	    push    OFFSET medianPrompt
- 00000049  E8 000000A8		    call    displayMedian               ; STACK: @ret, @medianPrompt, @numArr, numsTroGenerate
+ 00000049  E8 000000AB		    call    displayMedian               ; STACK: @ret, @medianPrompt, @numArr, numsTroGenerate
 				
 				;    push    numsToGenerate
 				;    push    OFFSET numArr   
@@ -180,7 +187,7 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
  0000004E  FF 35 000004BF R	    push    numsToGenerate
  00000054  68 0000019F R	    push    OFFSET numArr
  00000059  68 0000015F R	    push    OFFSET sortedPrompt        ; STACK: @ret, @sortedPrompt, @numArr, numsTroGenerate
- 0000005E  E8 000000F8		    call    displayList
+ 0000005E  E8 000000FB		    call    displayList
 				
 					exit	; exit to operating system
  00000063  6A 00	   *	    push   +000000000h
@@ -221,7 +228,7 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 				    ; set up stack
  00000097  55			    push    ebp             
  00000098  8B EC		    mov     ebp, esp
- 0000009A  8B 5D 08		    mov     ebx, [ebp+8]        ; put @numsToGenerate ref into EBX
+ 0000009A  8B 5D 08		    mov     ebx, [ebp+8]        ; put @numsToGenerate ref into EBX 
 				    ; STACK: ebp, ret@, @numsToGen
 				
 				    ; --------------------------------------------
@@ -253,11 +260,11 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 				    ; When input is valid, reset stack and return
 				    ; --------------------------------------------
  000000CB			    valid:
- 000000CB  89 03		        mov		[ebx], eax      ; put user input into numsToGen
- 000000CD  5D			        pop     ebp             ; STACK: ret@, @numsToGen
- 000000CE  C2 0004		        ret     4               ; pop off @numsToGen
+ 000000CB  A3 000004BF R	        mov		numsToGenerate, eax      ; put user input into numsToGen
+ 000000D0  5D			        pop     ebp             ; STACK: ret@, @numsToGen
+ 000000D1  C2 0004		        ret     4               ; pop off @numsToGen
 				
- 000000D1			getData ENDP
+ 000000D4			getData ENDP
 				
 				; NAME: fillArray
 				; description: Fill the array (numArr) with random numbers. Amount of elements 
@@ -266,34 +273,35 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 				; returns: numArr filled with the user's requested amount of random numbers
 				; preconditions: TODO numsToGenerate != NULL, count = 0, numArr is empty, LO < HI
 				; registers changed: ebp, edp, ecx, edi, eax
- 000000D1			fillArray PROC      ; TODO
+ 000000D4			fillArray PROC      ; TODO
 				
 				    ; STACK: @ret, @numArr, numsTroGenerate
 				    ; set up stack
- 000000D1  55			    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
- 000000D2  8B EC		    mov     ebp, esp
- 000000D4  8B 4D 0C		    mov     ecx, [ebp+12]        ; put numsToGenerate into ECX
- 000000D7  8B 7D 08		    mov     edi, [ebp+8] 
+ 000000D4  55			    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
+ 000000D5  8B EC		    mov     ebp, esp
+ 000000D7  8B 4D 08		    mov     ecx, [ebp+8]        ; put numsToGenerate into ECX
+ 000000DA  8B 7D 0C		    mov     edi, [ebp+12] 
 				
+					
 				    ; --------------------------------------------
 				    ; Generate random integers between HI and LO. 
 				    ; Fill numArr with user's requested amount of 
 				    ; random numbers. 
 				    ; --------------------------------------------
- 000000DA			    genRandomIntLoop:
- 000000DA  B8 000003E7		        mov     eax, HI         ; generate random number, from lecture 20
- 000000DF  83 E8 64		        sub     eax, LO
- 000000E2  40			        inc     eax
- 000000E3  E8 00000000 E	        call    RandomRange
- 000000E8  83 C0 64		        add     eax, LO
- 000000EB  89 07		        mov     [edi], eax      ; put random value into numArr
- 000000ED  83 C7 04		        add     edi, 4          ; increment to next index
- 000000F0  E2 E8		        loop    genRandomIntLoop
+ 000000DD			    genRandomIntLoop:
+ 000000DD  B8 000003E7		        mov     eax, HI         ; generate random number, from lecture 20
+ 000000E2  83 E8 64		        sub     eax, LO
+ 000000E5  40			        inc     eax
+ 000000E6  E8 00000000 E	        call    RandomRange
+ 000000EB  83 C0 64		        add     eax, LO
+ 000000EE  89 07		        mov     [edi], eax      ; put random value into numArr
+ 000000F0  83 C7 04		        add     edi, 4          ; increment to next index
+ 000000F3  E2 E8		        loop    genRandomIntLoop
 				       
- 000000F2  5D			        pop     ebp             ; STACK: @ret, @numArr, numsTroGenerate
- 000000F3  C2 0008		        ret     8               ; pop off numsTroGenerate, @numArr
+ 000000F5  5D			        pop     ebp             ; STACK: @ret, @numArr, numsTroGenerate
+ 000000F6  C2 0008		        ret     8               ; pop off numsTroGenerate, @numArr
 				
- 000000F6			fillArray ENDP
+ 000000F9			fillArray ENDP
 				
 				; NAME: sortArray
 				; description: TODO
@@ -311,7 +319,7 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 				;   exchange(array[k], array[i]);
 				;}
 				;
- 000000F6			sortArray PROC      ; TODO
+ 000000F9			sortArray PROC      ; TODO
 				
 				;    push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
 				;    mov     ebp, esp
@@ -344,7 +352,7 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 				
 				    
 				
- 000000F6			sortArray ENDP
+ 000000F9			sortArray ENDP
 				
 				; NAME: displayMedian
 				; description: TODO
@@ -352,67 +360,67 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 				; returns: TODO
 				; preconditions: TODO
 				; registers changed: TODO
- 000000F6			displayMedian PROC 
+ 000000F9			displayMedian PROC 
 				
 				    ; set up stack frame
- 000000F6  55			    push    ebp                 ; STACK: ebp, @ret, @medianPrompt, @numArr, numsTroGenerate
- 000000F7  8B EC		    mov     ebp, esp
- 000000F9  8B 45 10		    mov     eax, [ebp+16]        ; put numsToGenerate into EAX
- 000000FC  8B 75 0C		    mov     esi, [ebp+12] 
- 000000FF  BA 00000000		    mov     edx, 0
+ 000000F9  55			    push    ebp                 ; STACK: ebp, @ret, @medianPrompt, @numArr, numsTroGenerate
+ 000000FA  8B EC		    mov     ebp, esp
+ 000000FC  8B 45 10		    mov     eax, [ebp+16]        ; put numsToGenerate into EAX
+ 000000FF  8B 75 0C		    mov     esi, [ebp+12] 
+ 00000102  BA 00000000		    mov     edx, 0
 				
 				    ; median = (n + 1) / 2
- 00000104  B8 00000001		    mov     eax, 1
- 00000109  BB 00000002			mov		ebx, 2
- 0000010E  F7 F3		    div     ebx
- 00000110  83 FA 00		    cmp     edx, 0
- 00000113  74 20		    je      oddMedian
+ 00000107  B8 00000001		    mov     eax, 1
+ 0000010C  BB 00000002			mov		ebx, 2
+ 00000111  F7 F3		    div     ebx
+ 00000113  83 FA 00		    cmp     edx, 0
+ 00000116  74 20		    je      oddMedian
 				
 				    ; --------------------------------------------
 				    ; Find median for even array lengths
 				    ; --------------------------------------------
- 00000115			    evenMedian:
+ 00000118			    evenMedian:
 				    ; get first number
- 00000115  BB 00000004			mov		ebx, 4
- 0000011A  F7 E3		    mul     ebx         ; multiply eax by 4 
- 0000011C  03 F0		    add     esi, eax
- 0000011E  8B 16		    mov     edx, [esi]  ; put 1st num in edx
+ 00000118  BB 00000004			mov		ebx, 4
+ 0000011D  F7 E3		    mul     ebx         ; multiply eax by 4 
+ 0000011F  03 F0		    add     esi, eax
+ 00000121  8B 16		    mov     edx, [esi]  ; put 1st num in edx
 				
 				    ; get second number
- 00000120  83 C6 04		    add     esi, 4
- 00000123  8B 06		    mov     eax, [esi]  ; put 2nd num in eax
+ 00000123  83 C6 04		    add     esi, 4
+ 00000126  8B 06		    mov     eax, [esi]  ; put 2nd num in eax
 				
 				    ; find average of two numbers
- 00000125  03 C2		    add     eax, edx    ; add both numbers together
- 00000127  BA 00000000		    mov     edx, 0      ; reset edx
- 0000012C  BB 00000002			mov		ebx, 2
- 00000131  F7 F3		    div     ebx         ; divide sum by 2
+ 00000128  03 C2		    add     eax, edx    ; add both numbers together
+ 0000012A  BA 00000000		    mov     edx, 0      ; reset edx
+ 0000012F  BB 00000002			mov		ebx, 2
+ 00000134  F7 F3		    div     ebx         ; divide sum by 2
 				
- 00000133  EB 0B		    jmp     printMedian
+ 00000136  EB 0B		    jmp     printMedian
 				
 				    ; --------------------------------------------
 				    ; Retrieve odd median (middle of array)
 				    ; --------------------------------------------
- 00000135			    oddMedian:
- 00000135  BB 00000004		        mov		ebx, 4
- 0000013A  F7 E3				mul     ebx           ; multiply eax by 4
- 0000013C  03 F0		        add     esi, eax
- 0000013E  8B 06		        mov     eax, [esi]
+ 00000138			    oddMedian:
+ 00000138  BB 00000004		        mov		ebx, 4
+ 0000013D  F7 E3				mul     ebx           ; multiply eax by 4
+ 0000013F  03 F0		        add     esi, eax
+ 00000141  8B 06		        mov     eax, [esi]
 				
 				    ; --------------------------------------------
 				    ; Print the median (eax)
 				    ; --------------------------------------------
- 00000140			    printMedian:
- 00000140  E8 00000000 E	        call    CrLf
- 00000145  8B 55 08		        mov     edx, [ebp+8]
- 00000148  E8 00000000 E	        call    WriteString
- 0000014D  E8 00000000 E	        call	WriteDec
- 00000152  E8 00000000 E	        call    CrLf
+ 00000143			    printMedian:
+ 00000143  E8 00000000 E	        call    CrLf
+ 00000148  8B 55 08		        mov     edx, [ebp+8]
+ 0000014B  E8 00000000 E	        call    WriteString
+ 00000150  E8 00000000 E	        call	WriteDec
+ 00000155  E8 00000000 E	        call    CrLf
 				
- 00000157  5D			    pop     ebp
- 00000158  C2 000C		    ret     12
+ 0000015A  5D			    pop     ebp
+ 0000015B  C2 000C		    ret     12
 				
- 0000015B			displayMedian ENDP
+ 0000015E			displayMedian ENDP
 				
 				; NAME: displayList
 				; description: TODO
@@ -420,63 +428,63 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 				; returns: TODO
 				; preconditions: TODO
 				; registers changed: TODO
- 0000015B			displayList PROC        ; TODO
+ 0000015E			displayList PROC        ; TODO
 				
- 0000015B  55			    push    ebp     ; STACK: ebp, @ret, @prompt, @numArr, numsTroGenerate
- 0000015C  8B EC		    mov     ebp, esp
- 0000015E  8B 4D 10		    mov     ecx, [ebp+16]        ; put numsToGenerate into ECX
- 00000161  8B 75 0C		    mov     esi, [ebp+12]        ; put numArr into esi
+ 0000015E  55			    push    ebp     ; STACK: ebp, @ret, @prompt, @numArr, numsTroGenerate
+ 0000015F  8B EC		    mov     ebp, esp
+ 00000161  8B 4D 08		    mov     ecx, [ebp+8]        ; put numsToGenerate into ECX
+ 00000164  8B 75 0C		    mov     esi, [ebp+12]        ; put numArr into esi
 				
 				    ; display prompt
- 00000164  E8 00000000 E	    call    CrLf
- 00000169  8B 55 08		    mov     edx, [ebp+8]         ; put prompt into edx
- 0000016C  E8 00000000 E	    call    WriteString
- 00000171  E8 00000000 E	    call    CrLf
- 00000176  BA 00000000		    mov     edx, 0
+ 00000167  E8 00000000 E	    call    CrLf
+ 0000016C  8B 55 10		    mov     edx, [ebp+16]         ; put prompt into edx
+ 0000016F  E8 00000000 E	    call    WriteString
+ 00000174  E8 00000000 E	    call    CrLf
+ 00000179  BB 00000000		    mov     ebx, 0
 				
 				    ; --------------------------------------------
 				    ; Loop through numArr and print each integer
 				    ; --------------------------------------------
- 0000017B			    printInt:
+ 0000017E			    printInt:
 				        ; print int and spacing
- 0000017B  8B 04 16		        mov		eax, [esi+edx]
- 0000017E  E8 00000000 E	        call	WriteDec
- 00000183  BA 000004C3 R	        mov		edx, OFFSET spaces
- 00000188  E8 00000000 E	        call	WriteString
+ 0000017E  8B 04 1E		        mov		eax, [esi+ebx]
+ 00000181  E8 00000000 E	        call	WriteDec
+ 00000186  BA 000004C3 R	        mov		edx, OFFSET spaces
+ 0000018B  E8 00000000 E	        call	WriteString
 				
 				        ; increment indexes
- 0000018D  83 C2 04		        add		edx, 4
- 00000190  FF 05 000004C9 R	        inc		lineIndex
+ 00000190  83 C3 04		        add		ebx, 4
+ 00000193  FF 05 000004C9 R	        inc		lineIndex
 				
 				        ; print new line if needed
- 00000196  83 3D 000004C9 R	        cmp		lineIndex, MAX_PER_LINE
+ 00000199  83 3D 000004C9 R	        cmp		lineIndex, MAX_PER_LINE
 	   09
- 0000019D  7F 0E		        jg		newLine
- 0000019F  E2 DA		        loop	printInt
+ 000001A0  7F 0E		        jg		newLine
+ 000001A2  E2 DA		        loop	printInt
 				        
- 000001A1  C7 05 000004C9 R	        mov		lineIndex, 0            ; reset lineIndex
+ 000001A4  C7 05 000004C9 R	        mov		lineIndex, 0            ; reset lineIndex
 	   00000000
- 000001AB  EB 11		        jmp		stopPrint
+ 000001AE  EB 11		        jmp		stopPrint
 				
 				    ; --------------------------------------------
 				    ; Make new line after reaching MAX_PER_LINE 
 				    ;   index
 				    ; --------------------------------------------
- 000001AD			    newLine:
- 000001AD  E8 00000000 E	        call	CrLf
- 000001B2  C7 05 000004C9 R	        mov		lineIndex, 0            ; reset lineIndex
+ 000001B0			    newLine:
+ 000001B0  E8 00000000 E	        call	CrLf
+ 000001B5  C7 05 000004C9 R	        mov		lineIndex, 0            ; reset lineIndex
 	   00000000
- 000001BC  E2 BD		        loop	printInt
+ 000001BF  E2 BD		        loop	printInt
 				
 				    ; --------------------------------------------
 				    ; Stop printing process, clear register, and 
 				    ;   exit function
 				    ; --------------------------------------------
- 000001BE			    stopPrint:
- 000001BE  5D			        pop     ebp         ; STACK: @ret, @prompt, @numArr, numsTroGenerate
- 000001BF  C2 000C		        ret     12
+ 000001C1			    stopPrint:
+ 000001C1  5D			        pop     ebp         ; STACK: @ret, @prompt, @numArr, numsTroGenerate
+ 000001C2  C2 000C		        ret     12
 				
- 000001C2			displayList ENDP
+ 000001C5			displayList ENDP
 				
 				; NAME: goodbye
 				; description: TODO
@@ -484,14 +492,14 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
 				; returns: TODO
 				; preconditions: TODO
 				; registers changed: TODO
- 000001C2			goodbye		PROC        ; TODO
- 000001C2  BA 0000017E R		mov		edx, OFFSET byeMsg
- 000001C7  E8 00000000 E		call	WriteString
- 000001CC  C3				ret
- 000001CD			goodbye		ENDP
+ 000001C5			goodbye		PROC        ; TODO
+ 000001C5  BA 0000017E R		mov		edx, OFFSET byeMsg
+ 000001CA  E8 00000000 E		call	WriteString
+ 000001CF  C3				ret
+ 000001D0			goodbye		ENDP
 				
 				END main
-Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 19:30:18
+Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/05/19 21:03:47
 *Sorting Random Integers     (program4.asm		     Symbols 2 - 1
 
 
@@ -585,8 +593,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000004CD Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001CD Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000004E2 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001D0 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -693,26 +701,26 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayList  . . . . . . . . . .	P Near	 0000015B _TEXT	Length= 00000067 Public STDCALL
-  printInt . . . . . . . . . . .	L Near	 0000017B _TEXT	
-  newLine  . . . . . . . . . . .	L Near	 000001AD _TEXT	
-  stopPrint  . . . . . . . . . .	L Near	 000001BE _TEXT	
-displayMedian  . . . . . . . . .	P Near	 000000F6 _TEXT	Length= 00000065 Public STDCALL
-  evenMedian . . . . . . . . . .	L Near	 00000115 _TEXT	
-  oddMedian  . . . . . . . . . .	L Near	 00000135 _TEXT	
-  printMedian  . . . . . . . . .	L Near	 00000140 _TEXT	
-fillArray  . . . . . . . . . . .	P Near	 000000D1 _TEXT	Length= 00000025 Public STDCALL
-  genRandomIntLoop . . . . . . .	L Near	 000000DA _TEXT	
-getData  . . . . . . . . . . . .	P Near	 00000097 _TEXT	Length= 0000003A Public STDCALL
+displayList  . . . . . . . . . .	P Near	 0000015E _TEXT	Length= 00000067 Public STDCALL
+  printInt . . . . . . . . . . .	L Near	 0000017E _TEXT	
+  newLine  . . . . . . . . . . .	L Near	 000001B0 _TEXT	
+  stopPrint  . . . . . . . . . .	L Near	 000001C1 _TEXT	
+displayMedian  . . . . . . . . .	P Near	 000000F9 _TEXT	Length= 00000065 Public STDCALL
+  evenMedian . . . . . . . . . .	L Near	 00000118 _TEXT	
+  oddMedian  . . . . . . . . . .	L Near	 00000138 _TEXT	
+  printMedian  . . . . . . . . .	L Near	 00000143 _TEXT	
+fillArray  . . . . . . . . . . .	P Near	 000000D4 _TEXT	Length= 00000025 Public STDCALL
+  genRandomIntLoop . . . . . . .	L Near	 000000DD _TEXT	
+getData  . . . . . . . . . . . .	P Near	 00000097 _TEXT	Length= 0000003D Public STDCALL
   inputLoop  . . . . . . . . . .	L Near	 0000009D _TEXT	
   displayErrorMsg  . . . . . . .	L Near	 000000BA _TEXT	
   valid  . . . . . . . . . . . .	L Near	 000000CB _TEXT	
-goodbye  . . . . . . . . . . . .	P Near	 000001C2 _TEXT	Length= 0000000B Public STDCALL
+goodbye  . . . . . . . . . . . .	P Near	 000001C5 _TEXT	Length= 0000000B Public STDCALL
 introduction . . . . . . . . . .	P Near	 0000006A _TEXT	Length= 0000002D Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000006A Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-sortArray  . . . . . . . . . . .	P Near	 000000F6 _TEXT	Length= 00000000 Public STDCALL
+sortArray  . . . . . . . . . . .	P Near	 000000F9 _TEXT	Length= 00000000 Public STDCALL
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -941,6 +949,7 @@ brown  . . . . . . . . . . . . .	Number	 00000006h
 byeMsg . . . . . . . . . . . . .	Byte	 0000017E _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 description  . . . . . . . . . .	Byte	 00000036 _DATA	
+endLoopMsg . . . . . . . . . . .	Byte	 000004CD _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   

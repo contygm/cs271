@@ -37,7 +37,7 @@ sortedPrompt    BYTE    "The sorted list:",0
 invalidMsg      BYTE    "Invalid input",0
 
 ; goodbye prompt
-byeMsg       BYTE    "Thanks for using my program!",0
+byeMsg			BYTE    "Thanks for using my program!",0
 
 ; variables
 range           DWORD   ?               ; randomly generated range
@@ -45,6 +45,8 @@ numArr          DWORD   MAX DUP(?)      ; array for random numbers, as big as MA
 numsToGenerate  DWORD   ?               ; user input, how many numbers to be generated
 spaces          BYTE    "     ",0       ; 5 spaces
 lineIndex		DWORD	0
+
+endLoopMsg		BYTE	"end of genRandomInts",0
 
 .code
 main PROC
@@ -57,14 +59,15 @@ main PROC
     call    getData
 
     ; put fillArray params into stack
-    push    numsToGenerate
+    
     push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
+	push    numsToGenerate
     call    fillArray                   ; fill with random numbers
 
     ; display unsorted numbers
-    push    numsToGenerate
-    push    OFFSET numArr
     push    OFFSET unsortedPrompt
+	push    OFFSET numArr               ; STACK: @numArr, numsTroGenerate 
+	push    numsToGenerate
     call    displayList                 ; STACK: @ret, @unsortedPrompt, @numArr, numsTroGenerate
 
     ; calculate and display median
@@ -120,7 +123,7 @@ getData PROC
     ; set up stack
     push    ebp             
     mov     ebp, esp
-    mov     ebx, [ebp+8]        ; put @numsToGenerate ref into EBX
+    mov     ebx, [ebp+8]        ; put @numsToGenerate ref into EBX 
     ; STACK: ebp, ret@, @numsToGen
 
     ; --------------------------------------------
@@ -152,7 +155,7 @@ getData PROC
     ; When input is valid, reset stack and return
     ; --------------------------------------------
     valid:
-        mov		[ebx], eax      ; put user input into numsToGen
+        mov		numsToGenerate, eax      ; put user input into numsToGen
         pop     ebp             ; STACK: ret@, @numsToGen
         ret     4               ; pop off @numsToGen
 
@@ -171,9 +174,10 @@ fillArray PROC      ; TODO
     ; set up stack
     push    ebp                 ; STACK: ebp, @ret, @numArr, numsTroGenerate
     mov     ebp, esp
-    mov     ecx, [ebp+12]        ; put numsToGenerate into ECX
-    mov     edi, [ebp+8] 
+    mov     ecx, [ebp+8]        ; put numsToGenerate into ECX
+    mov     edi, [ebp+12] 
 
+	
     ; --------------------------------------------
     ; Generate random integers between HI and LO. 
     ; Fill numArr with user's requested amount of 
@@ -323,28 +327,28 @@ displayList PROC        ; TODO
 
     push    ebp     ; STACK: ebp, @ret, @prompt, @numArr, numsTroGenerate
     mov     ebp, esp
-    mov     ecx, [ebp+16]        ; put numsToGenerate into ECX
+    mov     ecx, [ebp+8]        ; put numsToGenerate into ECX
     mov     esi, [ebp+12]        ; put numArr into esi
 
     ; display prompt
     call    CrLf
-    mov     edx, [ebp+8]         ; put prompt into edx
+    mov     edx, [ebp+16]         ; put prompt into edx
     call    WriteString
     call    CrLf
-    mov     edx, 0
+    mov     ebx, 0
 
     ; --------------------------------------------
     ; Loop through numArr and print each integer
     ; --------------------------------------------
     printInt:
         ; print int and spacing
-        mov		eax, [esi+edx]
+        mov		eax, [esi+ebx]
         call	WriteDec
         mov		edx, OFFSET spaces
         call	WriteString
 
         ; increment indexes
-        add		edx, 4
+        add		ebx, 4
         inc		lineIndex
 
         ; print new line if needed
