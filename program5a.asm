@@ -22,22 +22,21 @@ ARRAY_SIZE = 10
 
 ; NAME: getString
 ; description: Display a prompt, get user input, put user input into memory.
-; parameters (in stack order): @strAddress
+; parameters (in stack order): @strAddress, @prompt
 ; returns: TODO
 ; preconditions: TODO
 ; registers changed: TODO
 ; CITATION: Lecture 26 - Macros
 ; TODO getString -> ReadString
 
-getString MACRO strAddress, prompt, inputVar
-	mov		edx, OFFSET prompt
+getString MACRO buffer, prompt
+	mov		edx, prompt
 	call	WriteString
 	push	ecx
 	push	edx
 	mov		edx, strAddress
-	mov		ecx, (sizeof [strAddress])-1
+	mov		ecx, (sizeof [buffer])-1
 	call	ReadString
-	mov		inputVar, eax
 	pop		edx
 	pop		ecx
 	
@@ -80,6 +79,7 @@ commaSpace		BYTE	",  ",0	;4b
 ; variables
 numArray		DWORD	ARRAY_SIZE DUP(?)
 inputStr		BYTE	32 DUP(0)
+buffer			BYTE	255 DUP(0)
 
 .code
 main PROC
@@ -92,10 +92,11 @@ main PROC
 	push	OFFSET programTitle
 	call	introduction		; stack: @ret, @title, @author, @d0, @d1, @d2
 
-	;TODO getNumInputs
+	;getNumInputs
+	push	OFFSET reInputPrompt
 	push	OFFSET invalidMsg	
 	push	OFFSET inputPrompt
-	push	OFFSET inputStr
+	push	OFFSET buffer
 	push	OFFSET numArray
 	call	getNumInputs		; stack: @ret, @numArray, @inputStr, @inputPrompt, @invalidMsg 
 	
@@ -162,7 +163,7 @@ goodbye			ENDP
 
 ; NAME: getNumInputs
 ; description: Get inputs from user and put them into numArray. 
-; parameters (in stack order): @numArray, @inputStr, @inputPrompt, @invalidMsg
+; parameters (in stack order): @numArray, @buffer, @inputPrompt, @invalidMsg
 ; returns: TODO
 ; preconditions: TODO
 ; registers changed: TODO
@@ -177,45 +178,62 @@ getNumInputs	PROC
     ; Populate numArray with user input
     ; --------------------------------------------
 	populate:
-		push	[ebp+16]		; invalidMsg
+		push	[ebp+24]		; reInputPrompt
+		push	[ebp+20]		; invalidMsg
 		push	[ebp+16]		; inputPrompt
-		push	[ebp+12]		; inputStr
-		push	[ebp+8]			; numArray
+		push	[ebp+12]		; buffer
 		call	ReadVal
 		pop     [edi]		    ; converted string into array
         add     edi, 4          ; increment to next index
         loop    populate
 
-	popad			; restore gp registers
-	ret		8
+	popad						; restore gp registers
+	ret		16
 	
 getNumInputs	ENDP
 
 ; NAME: ReadVal
 ; description: Using getString macro, get the user’s input as string. Convert 
 ;	the string to integers. Validatie the user’s input.
-; parameters (in stack order): @numArray, @inputStr, @inputPrompt, @invalidMsg
+; parameters (in stack order): @buffer, @inputPrompt, @invalidMsg
 ; returns: TODO
 ; preconditions: TODO
 ; registers changed: TODO
 
 ; TODO ReadVal
 ReadVal		PROC
+	pushad						; push general purpose registers onto stack
+	push    ebp
+	mov     ebp, esp
+
+	mov		edx, [ebp+12]		; inputPrompt
+	mov		ebx, [ebp+8]		; buffer
 
 	; --------------------------------------------
     ; get user input as string
     ; --------------------------------------------
 	readInput:
-
-	; --------------------------------------------
-    ; validate user input
-    ; --------------------------------------------
-	validate:
+		getString edx, ecx
+		lodsb
+		cmp		al, 0
+		je		invalid
+		cmp		al, 57
+		jg		invalid
+		cmp		al, 48
+		jl		invalid
+		loop	readInput
 
 	; --------------------------------------------
     ; For invalid inputs, reprompt user
     ; --------------------------------------------
 	invalid:
+		displayString [ebp+16]
+		call CrLf
+		displayString [ebp+20]	;reprompt 
+		jmp	readInput
+
+	popad
+	ret
 
 ReadVal		ENDP
 
