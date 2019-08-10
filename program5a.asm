@@ -22,15 +22,25 @@ ARRAY_SIZE = 10
 
 ; NAME: getString
 ; description: Display a prompt, get user input, put user input into memory.
-; parameters (in stack order): TODO
+; parameters (in stack order): @strAddress
 ; returns: TODO
 ; preconditions: TODO
 ; registers changed: TODO
 ; CITATION: Lecture 26 - Macros
 ; TODO getString -> ReadString
 
-getString MACRO 
-
+getString MACRO strAddress, prompt, inputVar
+	mov		edx, OFFSET prompt
+	call	WriteString
+	push	ecx
+	push	edx
+	mov		edx, strAddress
+	mov		ecx, (sizeof [strAddress])-1
+	call	ReadString
+	mov		inputVar, eax
+	pop		edx
+	pop		ecx
+	
 ENDM
 
 ; NAME: displayString
@@ -44,7 +54,7 @@ ENDM
 displayString MACRO strAddress
 
 	push	edx
-	mov		edx, strAddress
+	mov		edx, strAddress		; macro accepts OFFSET so don't need to use OFFSET here
 	call	WriteString
 	pop		edx
 
@@ -82,7 +92,13 @@ main PROC
 	push	OFFSET programTitle
 	call	introduction		; stack: @ret, @title, @author, @d0, @d1, @d2
 
-	;TODO getData
+	;TODO getNumInputs
+	push	OFFSET invalidMsg	
+	push	OFFSET inputPrompt
+	push	OFFSET inputStr
+	push	OFFSET numArray
+	call	getNumInputs		; stack: @ret, @numArray, @inputStr, @inputPrompt, @invalidMsg 
+	
 	;TODO printArray
 	;TODO calcSum
 	;TODO calcAvg
@@ -146,13 +162,75 @@ goodbye			ENDP
 
 ; NAME: getNumInputs
 ; description: Get inputs from user and put them into numArray. 
-; parameters (in stack order): TODO
+; parameters (in stack order): @numArray, @inputStr, @inputPrompt, @invalidMsg
 ; returns: TODO
 ; preconditions: TODO
 ; registers changed: TODO
 getNumInputs	PROC
+	pushad						; push general purpose registers onto stack
+	push    ebp
+	mov     ebp, esp
+	push	ecx, ARRAY_SIZE		; set up loop count
+	mov     edi, [ebp+8]		; put array in edi
 
+	; --------------------------------------------
+    ; Populate numArray with user input
+    ; --------------------------------------------
+	populate:
+		push	[ebp+16]		; invalidMsg
+		push	[ebp+16]		; inputPrompt
+		push	[ebp+12]		; inputStr
+		push	[ebp+8]			; numArray
+		call	ReadVal
+		pop     [edi]		    ; converted string into array
+        add     edi, 4          ; increment to next index
+        loop    populate
+
+	popad			; restore gp registers
+	ret		8
+	
 getNumInputs	ENDP
+
+; NAME: ReadVal
+; description: Using getString macro, get the user’s input as string. Convert 
+;	the string to integers. Validatie the user’s input.
+; parameters (in stack order): @numArray, @inputStr, @inputPrompt, @invalidMsg
+; returns: TODO
+; preconditions: TODO
+; registers changed: TODO
+
+; TODO ReadVal
+ReadVal		PROC
+
+	; --------------------------------------------
+    ; get user input as string
+    ; --------------------------------------------
+	readInput:
+
+	; --------------------------------------------
+    ; validate user input
+    ; --------------------------------------------
+	validate:
+
+	; --------------------------------------------
+    ; For invalid inputs, reprompt user
+    ; --------------------------------------------
+	invalid:
+
+ReadVal		ENDP
+
+; NAME: WriteString
+; description: Convert a integer to a string. Using the displayString macro, 
+;	output the string conversion.
+; parameters (in stack order): TODO
+; returns: TODO
+; preconditions: TODO
+; registers changed: TODO
+
+; TODO WriteVal
+WriteVal		PROC
+
+WriteVal		ENDP
 
 ; NAME: calculateAvg
 ; description: Caluclate the average of the number array 
@@ -173,31 +251,5 @@ calculateAvg	ENDP
 calculateSum	PROC
 
 calculateSum	ENDP
-
-; NAME: ReadVal
-; description: Using getString macr, get the user’s input as string. Convert 
-;	the string to integers. Validatie the user’s input.
-; parameters (in stack order): TODO
-; returns: TODO
-; preconditions: TODO
-; registers changed: TODO
-
-; TODO ReadVal
-ReadVal		PROC
-
-ReadVal		ENDP
-
-; NAME: WriteString
-; description: Convert a integer to a string. Using the displayString macro, 
-;	output the string conversion.
-; parameters (in stack order): TODO
-; returns: TODO
-; preconditions: TODO
-; registers changed: TODO
-
-; TODO WriteVal
-WriteVal		PROC
-
-WriteVal		ENDP
 
 END main
