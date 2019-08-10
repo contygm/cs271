@@ -40,7 +40,6 @@ invalidMsg      BYTE    "Invalid input",0
 byeMsg			BYTE    "Thanks for using my program!",0
 
 ; variables
-range           DWORD   ?               ; randomly generated range
 numArr          DWORD   MAX DUP(?)      ; array for random numbers, as big as MAX
 numsToGenerate  DWORD   ?               ; user input, how many numbers to be generated
 spaces          BYTE    "     ",0       ; 5 spaces
@@ -114,8 +113,7 @@ introduction ENDP
 ; NAME: getData
 ; description: Display input prompt, ensure user's input is within MIN and MAX, 
 ;   gets how many numbers the user wants to generate
-; parameters (in stack order): numsToGenerate (by reference),  MIN (global constant),
-;   MAX (global constant)
+; parameters (in stack order): numsToGenerate (by reference)
 ; returns: number of integers to be generated
 ; preconditions: none
 ; registers changed: ebp, ebx, esp, edx, eax
@@ -130,7 +128,7 @@ getData PROC
     ; Get input from user. Check that user input 
     ; is between MAX and MIN. 
     ; --------------------------------------------
-    inputLoop:
+    getInput:
         mov		edx, OFFSET inputPrompt
         call	WriteString
         call	ReadInt
@@ -149,7 +147,7 @@ getData PROC
         mov		edx, OFFSET invalidMsg
         call	WriteString
         call	CrLf
-        jmp		inputLoop  
+        jmp		getInput  
 
     ; --------------------------------------------
     ; When input is valid, reset stack and return
@@ -219,7 +217,7 @@ sortArray PROC
 		mov     esi, [ebp+12]	; reset register/array
 
 	; --------------------------------------------
-	; Outer loop of merge sort:
+	; Inner loop of merge sort:
     ;	for (j=k+1; j<request; j++)
     ; --------------------------------------------
     innerLoop: 
@@ -227,9 +225,17 @@ sortArray PROC
 		mov		eax, [esi]		; array[i]
 		cmp		ebx, eax		; array[j] > array[i]
 		jle		lessThan		; if (array[j] > array[i]) i = j;
-		mov		[esi+4], eax	; swap
+
+	; --------------------------------------------
+	; Swap array[j] and array[i]
+    ; --------------------------------------------
+	exchangeElements:
+		mov		[esi+4], eax
 		mov		[esi], ebx
 
+	; --------------------------------------------
+	; Continues loop when array[j] =< array[i]
+    ; --------------------------------------------
 	lessThan:
 		add		esi, 4			; j++
 		loop	innerLoop
@@ -316,15 +322,14 @@ displayMedian ENDP
 ; returns: displays contents of number array
 ; preconditions: numArray != null
 ; registers changed: ebp, ecx, esi, edx, ebx, eax
-displayList PROC        ; TODO
+displayList PROC      
 
-    push    ebp     ; STACK: ebp, @ret, @prompt, @numArr, numsTroGenerate
+    push    ebp    
     mov     ebp, esp
     mov     ecx, [ebp+8]        ; put numsToGenerate into ECX
     mov     esi, [ebp+12]        ; put numArr into esi
 
     ; display prompt
-    call    CrLf
     mov     edx, [ebp+16]         ; put prompt into edx
     call    WriteString
     call    CrLf
@@ -366,7 +371,7 @@ displayList PROC        ; TODO
     ;   exit function
     ; --------------------------------------------
     stopPrint:
-        pop     ebp         ; STACK: @ret, @prompt, @numArr, numsTroGenerate
+        pop     ebp       
         ret     12
 
 displayList ENDP
