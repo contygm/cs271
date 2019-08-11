@@ -27,7 +27,7 @@ ARRAY_SIZE = 10
 ; preconditions: TODO
 ; registers changed: TODO
 ; CITATION: Lecture 26 - Macros
-; TODO getString -> ReadString
+; TODO getString
 
 getString MACRO address, prompt
 	push	edx
@@ -35,7 +35,7 @@ getString MACRO address, prompt
 	mov		edx, prompt
 	call	WriteString
 	mov		edx, address
-	mov		ecx, 255
+	mov		ecx, 254
 	call	ReadString
 	pop		ecx
 	pop		edx
@@ -92,14 +92,22 @@ main PROC
 	push	OFFSET programTitle
 	call	introduction		; stack: @ret, @title, @author, @d0, @d1, @d2
 
-	;getNumInputs
-	push	OFFSET reInputPrompt
-	push	OFFSET invalidMsg	
-	push	OFFSET inputPrompt
-	push	OFFSET buffer
-	push	OFFSET numArray
-	call	getNumInputs		; stack: @ret, @numArray, , @inputPrompt, @invalidMsg 
-	
+	mov		ecx, ARRAY_SIZE		; set up loop count
+	mov     edi, OFFSET numArray		; put array in edi
+
+	; --------------------------------------------
+    ; Populate numArray with user input
+    ; --------------------------------------------
+	populate:	
+		push	OFFSET reInputPrompt
+		push	OFFSET invalidMsg
+		push	OFFSET inputPrompt
+		push	OFFSET buffer
+		call	ReadVal
+		pop     [edi]			; converted string into array
+        add     edi, 4          ; increment to next index
+        loop    populate
+
 	;TODO printArray
 	;TODO calcSum
 	;TODO calcAvg
@@ -161,40 +169,6 @@ goodbye			PROC
 
 goodbye			ENDP
 
-; NAME: getNumInputs
-; description: Get inputs from user and put them into numArray. 
-; parameters (in stack order): @numArray, @buffer, @inputPrompt, @invalidMsg, @reInputPrompt
-; returns: TODO
-; preconditions: TODO
-; registers changed: TODO
-getNumInputs	PROC
-	pushad						; push general purpose registers onto stack
-	push    ebp
-	mov     ebp, esp
-	mov		ecx, ARRAY_SIZE		; set up loop count
-	mov     edi, [ebp+8]		; put array in edi
-
-	; --------------------------------------------
-    ; Populate numArray with user input
-    ; --------------------------------------------
-	populate:	
-		push	[ebp+24]		; reInputPrompt
-		push	[ebp+20]		; invalidMsg
-		push	[ebp+16]		; inputPrompt
-		push	[ebp+12]		; buffer
-		mov		  edx, [ebp+16]
-		getString ebx, edx
-
-		call	ReadVal
-		pop     [edi]			; converted string into array
-        add     edi, 4          ; increment to next index
-        loop    populate
-
-	popad						; restore gp registers
-	ret		16
-	
-getNumInputs	ENDP
-
 ; NAME: ReadVal
 ; description: Using getString macro, get the user’s input as string. Convert 
 ;	the string to integers. Validatie the user’s input.
@@ -206,27 +180,25 @@ getNumInputs	ENDP
 ; TODO ReadVal
 ReadVal		PROC
 	LOCAL number:DWORD
-	
+	;pushad						; push general purpose registers onto stack
 	push    ebp
 	mov     ebp, esp
-	;pushad						; push general purpose registers onto stack
 
-	mov		edx, [ebp+12]		; inputPrompt
-	mov		ebx, [ebp+8]		; buffer
 	
-	;getString ebx, edx
-
-	mov		eax, [ebp+8]
-	call	WriteString
-	mov		edx, OFFSET buffer
-	mov		ecx, 255
-	call	ReadString
-
+	mov		edx, OFFSET inputPrompt		; inputPrompt
+	
 	; --------------------------------------------
     ; Get user input as string. Validate that chars
 	; are valid ascii nums
     ; --------------------------------------------
 	readInput:
+		mov		ebx, OFFSET buffer		; buffer
+		getString ebx, edx
+		mov		esi, edx		; set up registers	
+		mov		eax, 0											
+		mov		ecx, 0											
+		mov		ebx, 10			; need to multiply by 10 for proper placement
+		
 		lodsb
 		cmp		eax, 0			; check if end of string
 		je		finish
@@ -236,10 +208,6 @@ ReadVal		PROC
 		jl		invalid
 
 		; convert from char to int
-		mov		esi, edx		; set up registers							
-		mov		eax, 0											
-		mov		ecx, 0											
-		mov		ebx, 10			; need to multiply by 10 for proper placement
 		sub		eax, 48
 		xchg	eax, ecx
 		mul		ebx
@@ -251,13 +219,14 @@ ReadVal		PROC
     ; For invalid inputs, reprompt user
     ; --------------------------------------------
 	invalid:
-		displayString [ebp+16]	; display error
+		mov edx, OFFSET invalidMsg
+		displayString edx	; display error
 		call	CrLf
-		mov		edx, [ebp+20]	; reprompt 
-		getString ebx, edx
+		mov		edx, OFFSET reInputPrompt	; reprompt 
 		jmp		readInput
 
 	finish: 
+		add		eax, ecx
 		mov		[ebp+24], eax
 		;popad
 		ret	20

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
+Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 09:52:29
 9Demonstrating lowlevel I/O procedures     (program5a.asm    Page 1 - 1
 
 
@@ -48,7 +48,7 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
 				; preconditions: TODO
 				; registers changed: TODO
 				; CITATION: Lecture 26 - Macros
-				; TODO getString -> ReadString
+				; TODO getString
 
 				getString MACRO address, prompt
 					push	edx
@@ -56,7 +56,7 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
 					mov		edx, prompt
 					call	WriteString
 					mov		edx, address
-					mov		ecx, 255
+					mov		ecx, 254
 					call	ReadString
 					pop		ecx
 					pop		edx
@@ -213,28 +213,36 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
  0000000A  68 00000042 R		push	OFFSET directions_0
  0000000F  68 00000027 R		push	OFFSET author
  00000014  68 00000000 R		push	OFFSET programTitle
- 00000019  E8 0000002F			call	introduction		; stack: @ret, @title, @author, @d0, @d1, @d2
+ 00000019  E8 0000003B			call	introduction		; stack: @ret, @title, @author, @d0, @d1, @d2
 
-					;getNumInputs
- 0000001E  68 00000191 R		push	OFFSET reInputPrompt
- 00000023  68 0000014A R		push	OFFSET invalidMsg	
- 00000028  68 00000129 R		push	OFFSET inputPrompt
- 0000002D  68 00000256 R		push	OFFSET buffer
- 00000032  68 0000020E R		push	OFFSET numArray
- 00000037  E8 0000007A			call	getNumInputs		; stack: @ret, @numArray, , @inputPrompt, @invalidMsg 
-					
+ 0000001E  B9 0000000A			mov		ecx, ARRAY_SIZE		; set up loop count
+ 00000023  BF 0000020E R		mov     edi, OFFSET numArray		; put array in edi
+
+					; --------------------------------------------
+				    ; Populate numArray with user input
+				    ; --------------------------------------------
+ 00000028				populate:	
+ 00000028  68 00000191 R			push	OFFSET reInputPrompt
+ 0000002D  68 0000014A R			push	OFFSET invalidMsg
+ 00000032  68 00000129 R			push	OFFSET inputPrompt
+ 00000037  68 00000256 R			push	OFFSET buffer
+ 0000003C  E8 00000081				call	ReadVal
+ 00000041  8F 07				pop     [edi]			; converted string into array
+ 00000043  83 C7 04		        add     edi, 4          ; increment to next index
+ 00000046  E2 E0		        loop    populate
+
 					;TODO printArray
 					;TODO calcSum
 					;TODO calcAvg
 
 					;goodebye
- 0000003C  68 000001F6 R		push	OFFSET thanksMsg	; stack: @ret, @thanksMsg
- 00000041  E8 0000005D			call	goodbye
+ 00000048  68 000001F6 R		push	OFFSET thanksMsg	; stack: @ret, @thanksMsg
+ 0000004D  E8 0000005D			call	goodbye
 
 					exit	; exit to operating system
- 00000046  6A 00	   *	    push   +000000000h
- 00000048  E8 00000000 E   *	    call   ExitProcess
- 0000004D			main ENDP
+ 00000052  6A 00	   *	    push   +000000000h
+ 00000054  E8 00000000 E   *	    call   ExitProcess
+ 00000059			main ENDP
 
 				; NAME: introduction
 				; description: Display program greetings and instructions to the user
@@ -242,116 +250,73 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
 				; returns: n/a
 				; preconditions: passed prompts are not null
 				; registers changed: ebp, esp, edx
- 0000004D			introduction	PROC
+ 00000059			introduction	PROC
 					; set up stack frame
- 0000004D  55				push    ebp                 
- 0000004E  8B EC		    mov     ebp, esp
+ 00000059  55				push    ebp                 
+ 0000005A  8B EC		    mov     ebp, esp
 
- 00000050  8B 55 08			mov		edx, [ebp+8]	; can't pass address directly into macro call
+ 0000005C  8B 55 08			mov		edx, [ebp+8]	; can't pass address directly into macro call
 					displayString edx		; title
- 00000053  52		     1		push	edx
- 00000054  8B D2	     1		mov		edx, edx		; macro accepts OFFSET so don't need to use OFFSET here
- 00000056  E8 00000000 E     1		call	WriteString
- 0000005B  5A		     1		pop		edx
- 0000005C  E8 00000000 E		call	CrLf
+ 0000005F  52		     1		push	edx
+ 00000060  8B D2	     1		mov		edx, edx		; macro accepts OFFSET so don't need to use OFFSET here
+ 00000062  E8 00000000 E     1		call	WriteString
+ 00000067  5A		     1		pop		edx
+ 00000068  E8 00000000 E		call	CrLf
 					
- 00000061  8B 55 0C			mov		edx, [ebp+12]
+ 0000006D  8B 55 0C			mov		edx, [ebp+12]
 					displayString edx		; author
- 00000064  52		     1		push	edx
- 00000065  8B D2	     1		mov		edx, edx		; macro accepts OFFSET so don't need to use OFFSET here
- 00000067  E8 00000000 E     1		call	WriteString
- 0000006C  5A		     1		pop		edx
- 0000006D  E8 00000000 E		call	CrLf
+ 00000070  52		     1		push	edx
+ 00000071  8B D2	     1		mov		edx, edx		; macro accepts OFFSET so don't need to use OFFSET here
+ 00000073  E8 00000000 E     1		call	WriteString
+ 00000078  5A		     1		pop		edx
+ 00000079  E8 00000000 E		call	CrLf
 
 					displayString [ebp+16]	; d0
- 00000072  52		     1		push	edx
- 00000073  8B 55 10	     1		mov		edx, [ebp+16]		; macro accepts OFFSET so don't need to use OFFSET here
- 00000076  E8 00000000 E     1		call	WriteString
- 0000007B  5A		     1		pop		edx
- 0000007C  E8 00000000 E		call	CrLf
+ 0000007E  52		     1		push	edx
+ 0000007F  8B 55 10	     1		mov		edx, [ebp+16]		; macro accepts OFFSET so don't need to use OFFSET here
+ 00000082  E8 00000000 E     1		call	WriteString
+ 00000087  5A		     1		pop		edx
+ 00000088  E8 00000000 E		call	CrLf
 
 					displayString [ebp+20]	; d1
- 00000081  52		     1		push	edx
- 00000082  8B 55 14	     1		mov		edx, [ebp+20]		; macro accepts OFFSET so don't need to use OFFSET here
- 00000085  E8 00000000 E     1		call	WriteString
- 0000008A  5A		     1		pop		edx
- 0000008B  E8 00000000 E		call	CrLf
+ 0000008D  52		     1		push	edx
+ 0000008E  8B 55 14	     1		mov		edx, [ebp+20]		; macro accepts OFFSET so don't need to use OFFSET here
+ 00000091  E8 00000000 E     1		call	WriteString
+ 00000096  5A		     1		pop		edx
+ 00000097  E8 00000000 E		call	CrLf
 
 					displayString [ebp+24]	; d2
- 00000090  52		     1		push	edx
- 00000091  8B 55 18	     1		mov		edx, [ebp+24]		; macro accepts OFFSET so don't need to use OFFSET here
- 00000094  E8 00000000 E     1		call	WriteString
- 00000099  5A		     1		pop		edx
- 0000009A  E8 00000000 E		call	CrLf
+ 0000009C  52		     1		push	edx
+ 0000009D  8B 55 18	     1		mov		edx, [ebp+24]		; macro accepts OFFSET so don't need to use OFFSET here
+ 000000A0  E8 00000000 E     1		call	WriteString
+ 000000A5  5A		     1		pop		edx
+ 000000A6  E8 00000000 E		call	CrLf
 					
- 0000009F  5D				pop		ebp
- 000000A0  C2 0014			ret		20
+ 000000AB  5D				pop		ebp
+ 000000AC  C2 0014			ret		20
 
- 000000A3			introduction	ENDP
+ 000000AF			introduction	ENDP
 
 				; NAME: goodbye
 				; description: Display program end greeting
 				; parameters (in stack order): @thanksMsg
 				; returns: displays thanks message
-; preconditions: thanks message isn't null
+				; preconditions: thanks message isn't null
 				; registers changed: ebp, esp, edx
- 000000A3			goodbye			PROC
- 000000A3  55				push    ebp
- 000000A4  8B EC			mov     ebp, esp
- 000000A6  8B 55 08			mov		edx, [ebp+8]
+ 000000AF			goodbye			PROC
+ 000000AF  55				push    ebp
+ 000000B0  8B EC			mov     ebp, esp
+ 000000B2  8B 55 08			mov		edx, [ebp+8]
 					displayString edx
- 000000A9  52		     1		push	edx
- 000000AA  8B D2	     1		mov		edx, edx		; macro accepts OFFSET so don't need to use OFFSET here
- 000000AC  E8 00000000 E     1		call	WriteString
- 000000B1  5A		     1		pop		edx
+ 000000B5  52		     1		push	edx
+ 000000B6  8B D2	     1		mov		edx, edx		; macro accepts OFFSET so don't need to use OFFSET here
+ 000000B8  E8 00000000 E     1		call	WriteString
+ 000000BD  5A		     1		pop		edx
 
- 000000B2  5D				pop		ebp
- 000000B3  C2 0004			ret		4
+ 000000BE  5D				pop		ebp
+ 000000BF  C2 0004			ret		4
 
- 000000B6			goodbye			ENDP
-
-				; NAME: getNumInputs
-				; description: Get inputs from user and put them into numArray. 
-				; parameters (in stack order): @numArray, @buffer, @inputPrompt, @invalidMsg, @reInputPrompt
-				; returns: TODO
-				; preconditions: TODO
-				; registers changed: TODO
- 000000B6			getNumInputs	PROC
- 000000B6  60				pushad						; push general purpose registers onto stack
- 000000B7  55				push    ebp
- 000000B8  8B EC			mov     ebp, esp
- 000000BA  B9 0000000A			mov		ecx, ARRAY_SIZE		; set up loop count
- 000000BF  8B 7D 08			mov     edi, [ebp+8]		; put array in edi
-
-					; --------------------------------------------
-				    ; Populate numArray with user input
-				    ; --------------------------------------------
- 000000C2				populate:	
- 000000C2  FF 75 18				push	[ebp+24]		; reInputPrompt
- 000000C5  FF 75 14				push	[ebp+20]		; invalidMsg
- 000000C8  FF 75 10				push	[ebp+16]		; inputPrompt
- 000000CB  FF 75 0C				push	[ebp+12]		; buffer
- 000000CE  8B 55 10				mov		  edx, [ebp+16]
-						getString ebx, edx
- 000000D1  52		     1		push	edx
- 000000D2  51		     1		push	ecx
- 000000D3  8B D2	     1		mov		edx, edx
- 000000D5  E8 00000000 E     1		call	WriteString
- 000000DA  8B D3	     1		mov		edx, ebx
- 000000DC  B9 000000FF	     1		mov		ecx, 255
- 000000E1  E8 00000000 E     1		call	ReadString
- 000000E6  59		     1		pop		ecx
- 000000E7  5A		     1		pop		edx
-
- 000000E8  E8 0000000B				call	ReadVal
- 000000ED  8F 07				pop     [edi]			; converted string into array
- 000000EF  83 C7 04		        add     edi, 4          ; increment to next index
- 000000F2  E2 CE		        loop    populate
-
- 000000F4  61				popad						; restore gp registers
- 000000F5  C2 0010			ret		16
-					
- 000000F8			getNumInputs	ENDP
+ 000000C2			goodbye			ENDP
 
 				; NAME: ReadVal
 				; description: Using getString macro, get the user’s input as string. Convert 
@@ -362,82 +327,77 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
 				; registers changed: TODO
 
 				; TODO ReadVal
- 000000F8			ReadVal		PROC
+ 000000C2			ReadVal		PROC
 					LOCAL number:DWORD
-					
- 000000F8  55		   *	    push   ebp
- 000000F9  8B EC	   *	    mov    ebp, esp
- 000000FB  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
- 000000FE  55				push    ebp
- 000000FF  8B EC			mov     ebp, esp
 					;pushad						; push general purpose registers onto stack
+ 000000C2  55		   *	    push   ebp
+ 000000C3  8B EC	   *	    mov    ebp, esp
+ 000000C5  83 C4 FC	   *	    add    esp, 0FFFFFFFCh
+ 000000C8  55				push    ebp
+ 000000C9  8B EC			mov     ebp, esp
 
- 00000101  8B 55 0C			mov		edx, [ebp+12]		; inputPrompt
- 00000104  8B 5D 08			mov		ebx, [ebp+8]		; buffer
 					
-					;getString ebx, edx
-
- 00000107  8B 45 08			mov		eax, [ebp+8]
- 0000010A  E8 00000000 E		call	WriteString
- 0000010F  BA 00000256 R		mov		edx, OFFSET buffer
- 00000114  B9 000000FF			mov		ecx, 255
- 00000119  E8 00000000 E		call	ReadString
-
+ 000000CB  BA 00000129 R		mov		edx, OFFSET inputPrompt		; inputPrompt
+					
 					; --------------------------------------------
 				    ; Get user input as string. Validate that chars
 					; are valid ascii nums
 				    ; --------------------------------------------
- 0000011E				readInput:
- 0000011E  AC					lodsb
- 0000011F  83 F8 00				cmp		eax, 0			; check if end of string
- 00000122  74 53				je		finish
- 00000124  83 F8 39				cmp		eax, 57			; upperlimit, 9
- 00000127  7F 23				jg		invalid
- 00000129  83 F8 30				cmp		eax, 48			; lowerlimit, 0
- 0000012C  7C 1E				jl		invalid
+ 000000D0				readInput:
+ 000000D0  BB 00000256 R			mov		ebx, OFFSET buffer		; buffer
+						getString ebx, edx
+ 000000D5  52		     1		push	edx
+ 000000D6  51		     1		push	ecx
+ 000000D7  8B D2	     1		mov		edx, edx
+ 000000D9  E8 00000000 E     1		call	WriteString
+ 000000DE  8B D3	     1		mov		edx, ebx
+ 000000E0  B9 000000FE	     1		mov		ecx, 254
+ 000000E5  E8 00000000 E     1		call	ReadString
+ 000000EA  59		     1		pop		ecx
+ 000000EB  5A		     1		pop		edx
+ 000000EC  8B F2				mov		esi, edx		; set up registers	
+ 000000EE  B8 00000000				mov		eax, 0											
+ 000000F3  B9 00000000				mov		ecx, 0											
+ 000000F8  BB 0000000A				mov		ebx, 10			; need to multiply by 10 for proper placement
+						
+ 000000FD  AC					lodsb
+ 000000FE  83 F8 00				cmp		eax, 0			; check if end of string
+ 00000101  74 31				je		finish
+ 00000103  83 F8 39				cmp		eax, 57			; upperlimit, 9
+ 00000106  7F 12				jg		invalid
+ 00000108  83 F8 30				cmp		eax, 48			; lowerlimit, 0
+ 0000010B  7C 0D				jl		invalid
 
 						; convert from char to int
- 0000012E  8B F2				mov		esi, edx		; set up registers							
- 00000130  B8 00000000				mov		eax, 0											
- 00000135  B9 00000000				mov		ecx, 0											
- 0000013A  BB 0000000A				mov		ebx, 10			; need to multiply by 10 for proper placement
- 0000013F  83 E8 30				sub		eax, 48
- 00000142  91					xchg	eax, ecx
- 00000143  F7 E3				mul		ebx
- 00000145  72 05				jc		invalid			; if carry flag is set, number is out of range
- 00000147  89 45 FC				mov		number, eax
- 0000014A  EB 2B				jmp		finish
+ 0000010D  83 E8 30				sub		eax, 48
+ 00000110  91					xchg	eax, ecx
+ 00000111  F7 E3				mul		ebx
+ 00000113  72 05				jc		invalid			; if carry flag is set, number is out of range
+ 00000115  89 45 FC				mov		number, eax
+ 00000118  EB 1A				jmp		finish
 
 					; --------------------------------------------
 				    ; For invalid inputs, reprompt user
 				    ; --------------------------------------------
- 0000014C				invalid:
-						displayString [ebp+16]	; display error
- 0000014C  52		     1		push	edx
- 0000014D  8B 55 10	     1		mov		edx, [ebp+16]		; macro accepts OFFSET so don't need to use OFFSET here
- 00000150  E8 00000000 E     1		call	WriteString
- 00000155  5A		     1		pop		edx
- 00000156  E8 00000000 E			call	CrLf
- 0000015B  8B 55 14				mov		edx, [ebp+20]	; reprompt 
-						getString ebx, edx
- 0000015E  52		     1		push	edx
- 0000015F  51		     1		push	ecx
- 00000160  8B D2	     1		mov		edx, edx
- 00000162  E8 00000000 E     1		call	WriteString
- 00000167  8B D3	     1		mov		edx, ebx
- 00000169  B9 000000FF	     1		mov		ecx, 255
- 0000016E  E8 00000000 E     1		call	ReadString
- 00000173  59		     1		pop		ecx
- 00000174  5A		     1		pop		edx
- 00000175  EB A7				jmp		readInput
+ 0000011A				invalid:
+ 0000011A  BA 0000014A R			mov edx, OFFSET invalidMsg
+						displayString edx	; display error
+ 0000011F  52		     1		push	edx
+ 00000120  8B D2	     1		mov		edx, edx		; macro accepts OFFSET so don't need to use OFFSET here
+ 00000122  E8 00000000 E     1		call	WriteString
+ 00000127  5A		     1		pop		edx
+ 00000128  E8 00000000 E			call	CrLf
+ 0000012D  BA 00000191 R			mov		edx, OFFSET reInputPrompt	; reprompt 
+ 00000132  EB 9C				jmp		readInput
 
- 00000177				finish: 
- 00000177  89 45 18				mov		[ebp+24], eax
+ 00000134				finish: 
+ 00000134  03 C1				add		eax, ecx
+ 00000136  89 45 18				mov		[ebp+24], eax
 						;popad
- 0000017A  C9		   *	    leave  
- 0000017B  C2 0014				ret	20
+ 00000139  C9		   *	    leave  
+ 0000013A  C2 0014				ret	20
 
- 0000017E			ReadVal		ENDP
+ 0000013D			ReadVal		ENDP
 
 				; NAME: WriteString
 				; description: Convert a integer to a string. Using the displayString macro, 
@@ -448,9 +408,9 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
 				; registers changed: TODO
 
 				; TODO WriteVal
- 0000017E			WriteVal		PROC
+ 0000013D			WriteVal		PROC
 
- 0000017E			WriteVal		ENDP
+ 0000013D			WriteVal		ENDP
 
 				; NAME: calculateAvg
 				; description: Caluclate the average of the number array 
@@ -458,9 +418,9 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
 				; returns: TODO
 				; preconditions: TODO
 				; registers changed: TODO
- 0000017E			calculateAvg	PROC
+ 0000013D			calculateAvg	PROC
 
- 0000017E			calculateAvg	ENDP
+ 0000013D			calculateAvg	ENDP
 
 				; NAME: calculateSum
 				; description: Caluclate the sum of the number array 
@@ -468,12 +428,12 @@ Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
 				; returns: TODO
 				; preconditions: TODO
 				; registers changed: TODO
- 0000017E			calculateSum	PROC
+ 0000013D			calculateSum	PROC
 
- 0000017E			calculateSum	ENDP
+ 0000013D			calculateSum	ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 01:37:41
+Microsoft (R) Macro Assembler Version 14.22.27905.0	    08/11/19 09:52:29
 9Demonstrating lowlevel I/O procedures     (program5a.asm    Symbols 2 - 1
 
 
@@ -576,7 +536,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000355 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000017E Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000013D Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -646,11 +606,11 @@ ReadInt  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ReadKeyFlush . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadKey  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadString . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-ReadVal  . . . . . . . . . . . .	P Near	 000000F8 _TEXT	Length= 00000086 Public STDCALL
+ReadVal  . . . . . . . . . . . .	P Near	 000000C2 _TEXT	Length= 0000007B Public STDCALL
   number . . . . . . . . . . . .	DWord	 bp - 00000004
-  readInput  . . . . . . . . . .	L Near	 0000011E _TEXT	
-  invalid  . . . . . . . . . . .	L Near	 0000014C _TEXT	
-  finish . . . . . . . . . . . .	L Near	 00000177 _TEXT	
+  readInput  . . . . . . . . . .	L Near	 000000D0 _TEXT	
+  invalid  . . . . . . . . . . .	L Near	 0000011A _TEXT	
+  finish . . . . . . . . . . . .	L Near	 00000134 _TEXT	
 SetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -687,15 +647,14 @@ WriteStackFrameName  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-WriteVal . . . . . . . . . . . .	P Near	 0000017E _TEXT	Length= 00000000 Public STDCALL
+WriteVal . . . . . . . . . . . .	P Near	 0000013D _TEXT	Length= 00000000 Public STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-calculateAvg . . . . . . . . . .	P Near	 0000017E _TEXT	Length= 00000000 Public STDCALL
-calculateSum . . . . . . . . . .	P Near	 0000017E _TEXT	Length= 00000000 Public STDCALL
-getNumInputs . . . . . . . . . .	P Near	 000000B6 _TEXT	Length= 00000042 Public STDCALL
-  populate . . . . . . . . . . .	L Near	 000000C2 _TEXT	
-goodbye  . . . . . . . . . . . .	P Near	 000000A3 _TEXT	Length= 00000013 Public STDCALL
-introduction . . . . . . . . . .	P Near	 0000004D _TEXT	Length= 00000056 Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000004D Public STDCALL
+calculateAvg . . . . . . . . . .	P Near	 0000013D _TEXT	Length= 00000000 Public STDCALL
+calculateSum . . . . . . . . . .	P Near	 0000013D _TEXT	Length= 00000000 Public STDCALL
+goodbye  . . . . . . . . . . . .	P Near	 000000AF _TEXT	Length= 00000013 Public STDCALL
+introduction . . . . . . . . . .	P Near	 00000059 _TEXT	Length= 00000056 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000059 Public STDCALL
+  populate . . . . . . . . . . .	L Near	 00000028 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
