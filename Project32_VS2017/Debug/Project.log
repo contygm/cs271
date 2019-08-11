@@ -1,2 +1,3 @@
 ﻿  Assembling ..\program5a.asm...
+..\program5a.asm(237): warning A6004: procedure argument or local not referenced : number
   Project.vcxproj -> C:\Users\conty\cs271\Project32_VS2017\Debug\Project.exe

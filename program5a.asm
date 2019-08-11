@@ -75,6 +75,7 @@ sumMsg			BYTE	"The sum of these numbers is: ",0	;30b
 avgMsg			BYTE	"The average is: ",0	;17b
 thanksMsg		BYTE	"Thanks for playing!",0	;20b
 commaSpace		BYTE	",  ",0	;4b
+tempNum			DWORD	?
 
 ; variables
 numArray		DWORD	ARRAY_SIZE DUP(?)
@@ -93,19 +94,20 @@ main PROC
 	call	introduction		; stack: @ret, @title, @author, @d0, @d1, @d2
 
 	mov		ecx, ARRAY_SIZE		; set up loop count
-	mov     edi, OFFSET numArray		; put array in edi
+	mov     esi, OFFSET numArray		; put array in edi
 
 	; --------------------------------------------
     ; Populate numArray with user input
     ; --------------------------------------------
 	populate:	
-		push	OFFSET reInputPrompt
-		push	OFFSET invalidMsg
-		push	OFFSET inputPrompt
-		push	OFFSET buffer
+		;push	OFFSET reInputPrompt
+		;push	OFFSET invalidMsg
+		;push	OFFSET inputPrompt
+		;push	OFFSET buffer
 		call	ReadVal
-		pop     [edi]			; converted string into array
-        add     edi, 4          ; increment to next index
+		mov		eax, tempNum
+		mov     [esi], eax			; converted string into array
+        add     esi, 4          ; increment to next index
         loop    populate
 
 	;TODO printArray
@@ -180,11 +182,10 @@ goodbye			ENDP
 ; TODO ReadVal
 ReadVal		PROC
 	LOCAL number:DWORD
-	;pushad						; push general purpose registers onto stack
+							; push general purpose registers onto stack
 	push    ebp
 	mov     ebp, esp
-
-	
+pushad
 	mov		edx, OFFSET inputPrompt		; inputPrompt
 	
 	; --------------------------------------------
@@ -194,26 +195,27 @@ ReadVal		PROC
 	readInput:
 		mov		ebx, OFFSET buffer		; buffer
 		getString ebx, edx
-		mov		esi, edx		; set up registers	
+		mov		esi, ebx		; set up registers	
 		mov		eax, 0											
 		mov		ecx, 0											
 		mov		ebx, 10			; need to multiply by 10 for proper placement
-		
+	loadString:
 		lodsb
-		cmp		eax, 0			; check if end of string
+		cmp		al, 0			; check if end of string
 		je		finish
-		cmp		eax, 57			; upperlimit, 9
+		cmp		al, 57			; upperlimit, 9
 		jg		invalid
-		cmp		eax, 48			; lowerlimit, 0
+		cmp		al, 48			; lowerlimit, 0
 		jl		invalid
 
 		; convert from char to int
-		sub		eax, 48
+		sub		al, 48
 		xchg	eax, ecx
 		mul		ebx
 		jc		invalid			; if carry flag is set, number is out of range
-		mov		number, eax
-		jmp		finish
+		add		eax, ecx
+		xchg	eax, ecx
+		jmp		loadString
 
 	; --------------------------------------------
     ; For invalid inputs, reprompt user
@@ -226,10 +228,11 @@ ReadVal		PROC
 		jmp		readInput
 
 	finish: 
-		add		eax, ecx
-		mov		[ebp+24], eax
-		;popad
-		ret	20
+		xchg	ecx, eax
+		mov		tempNum, eax
+		popad
+		pop	ebp
+		ret
 
 ReadVal		ENDP
 
