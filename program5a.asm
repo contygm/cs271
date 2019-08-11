@@ -29,16 +29,16 @@ ARRAY_SIZE = 10
 ; CITATION: Lecture 26 - Macros
 ; TODO getString -> ReadString
 
-getString MACRO buffer, prompt
+getString MACRO address, prompt
+	push	edx
+	push	ecx
 	mov		edx, prompt
 	call	WriteString
-	push	ecx
-	push	edx
-	mov		edx, strAddress
-	mov		ecx, (sizeof [buffer])-1
+	mov		edx, address
+	mov		ecx, 255
 	call	ReadString
-	pop		edx
 	pop		ecx
+	pop		edx
 	
 ENDM
 
@@ -98,7 +98,7 @@ main PROC
 	push	OFFSET inputPrompt
 	push	OFFSET buffer
 	push	OFFSET numArray
-	call	getNumInputs		; stack: @ret, @numArray, @inputStr, @inputPrompt, @invalidMsg 
+	call	getNumInputs		; stack: @ret, @numArray, , @inputPrompt, @invalidMsg 
 	
 	;TODO printArray
 	;TODO calcSum
@@ -163,7 +163,7 @@ goodbye			ENDP
 
 ; NAME: getNumInputs
 ; description: Get inputs from user and put them into numArray. 
-; parameters (in stack order): @numArray, @buffer, @inputPrompt, @invalidMsg
+; parameters (in stack order): @numArray, @buffer, @inputPrompt, @invalidMsg, @reInputPrompt
 ; returns: TODO
 ; preconditions: TODO
 ; registers changed: TODO
@@ -171,19 +171,22 @@ getNumInputs	PROC
 	pushad						; push general purpose registers onto stack
 	push    ebp
 	mov     ebp, esp
-	push	ecx, ARRAY_SIZE		; set up loop count
+	mov		ecx, ARRAY_SIZE		; set up loop count
 	mov     edi, [ebp+8]		; put array in edi
 
 	; --------------------------------------------
     ; Populate numArray with user input
     ; --------------------------------------------
-	populate:
+	populate:	
 		push	[ebp+24]		; reInputPrompt
 		push	[ebp+20]		; invalidMsg
 		push	[ebp+16]		; inputPrompt
 		push	[ebp+12]		; buffer
+		mov		  edx, [ebp+16]
+		getString ebx, edx
+
 		call	ReadVal
-		pop     [edi]		    ; converted string into array
+		pop     [edi]			; converted string into array
         add     edi, 4          ; increment to next index
         loop    populate
 
@@ -195,45 +198,69 @@ getNumInputs	ENDP
 ; NAME: ReadVal
 ; description: Using getString macro, get the user’s input as string. Convert 
 ;	the string to integers. Validatie the user’s input.
-; parameters (in stack order): @buffer, @inputPrompt, @invalidMsg
+; parameters (in stack order): @buffer, @inputPrompt, @invalidMsg, @reInputPrompt
 ; returns: TODO
 ; preconditions: TODO
 ; registers changed: TODO
 
 ; TODO ReadVal
 ReadVal		PROC
-	pushad						; push general purpose registers onto stack
+	LOCAL number:DWORD
+	
 	push    ebp
 	mov     ebp, esp
+	;pushad						; push general purpose registers onto stack
 
 	mov		edx, [ebp+12]		; inputPrompt
 	mov		ebx, [ebp+8]		; buffer
+	
+	;getString ebx, edx
+
+	mov		eax, [ebp+8]
+	call	WriteString
+	mov		edx, OFFSET buffer
+	mov		ecx, 255
+	call	ReadString
 
 	; --------------------------------------------
-    ; get user input as string
+    ; Get user input as string. Validate that chars
+	; are valid ascii nums
     ; --------------------------------------------
 	readInput:
-		getString edx, ecx
 		lodsb
-		cmp		al, 0
-		je		invalid
-		cmp		al, 57
+		cmp		eax, 0			; check if end of string
+		je		finish
+		cmp		eax, 57			; upperlimit, 9
 		jg		invalid
-		cmp		al, 48
+		cmp		eax, 48			; lowerlimit, 0
 		jl		invalid
-		loop	readInput
+
+		; convert from char to int
+		mov		esi, edx		; set up registers							
+		mov		eax, 0											
+		mov		ecx, 0											
+		mov		ebx, 10			; need to multiply by 10 for proper placement
+		sub		eax, 48
+		xchg	eax, ecx
+		mul		ebx
+		jc		invalid			; if carry flag is set, number is out of range
+		mov		number, eax
+		jmp		finish
 
 	; --------------------------------------------
     ; For invalid inputs, reprompt user
     ; --------------------------------------------
 	invalid:
-		displayString [ebp+16]
-		call CrLf
-		displayString [ebp+20]	;reprompt 
-		jmp	readInput
+		displayString [ebp+16]	; display error
+		call	CrLf
+		mov		edx, [ebp+20]	; reprompt 
+		getString ebx, edx
+		jmp		readInput
 
-	popad
-	ret
+	finish: 
+		mov		[ebp+24], eax
+		;popad
+		ret	20
 
 ReadVal		ENDP
 
